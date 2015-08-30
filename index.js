@@ -12,11 +12,11 @@ server.listen(port, function(){
 app.use(express.static('public'));
 
 app.get('/display', function(req, res) {
-	res.sendFile(__dirname + '/public/display.html');
+	res.sendFile(__dirname + '/public/display/display.html');
 });
 
 app.get('/controller', function(req, res) {
-	res.sendFile(__dirname + '/public/controller.html');
+	res.sendFile(__dirname + '/public/controller/controller.html');
 });
 
 var display = io.of('/display');

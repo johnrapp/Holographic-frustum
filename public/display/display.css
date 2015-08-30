@@ -1,0 +1,94 @@
+body {
+	margin: 0;
+	padding: 0;
+	background: black;
+}
+
+canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	margin: auto;
+}
+#container {
+	position: absolute;
+	width: 100vh;
+	height: 100vh;
+	
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	margin: auto;
+}
+/*#front*/ #container div:nth-child(1), /*#back*/ #container div:nth-child(3) {
+	width: 100%;
+	height: 50%;
+}
+/*#left*/ #container div:nth-child(2), /*#right*/ #container div:nth-child(4) {
+	width: 100%;
+	height: 50%;
+	top: 25%;
+}
+/*#front*/ #container div:nth-child(1) {
+	/*background: blue;*/
+}
+/*#left*/ #container div:nth-child(2) {
+	/*background: red;*/
+	transform: rotate(-90deg);
+	left: -25%;
+}
+/*#right*/ #container div:nth-child(4) {
+	/*background: green;*/
+	transform: rotate(90deg);
+	right: -25%;
+}
+/*#back*/ #container div:nth-child(3) {
+	/*background: yellow;*/
+	transform: rotate(180deg);
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
+.side {
+	position: absolute;
+	width: 100%;
+	height: 50%;
+	-webkit-clip-path: polygon(0% 0%, 50% 100%, 100% 0%);
+}
+.side canvas {
+	-webkit-clip-path: polygon(0% 0%, 50% 100%, 100% 0%);
+}
+
+@media (max-aspect-ratio: 1/1) {
+	#container {
+		width: 100vw;
+		height: 100vw;
+	} 
+}
+
+#clock {
+	color: white;
+	font-size: 65px;
+	text-align: center;
+	margin-top: 30px;
+}
+
+#clock .h:before,
+#clock .m:before,
+#clock .s:before {
+	content: attr(time);
+}
+
+#clock .h[time="0"]:before, #clock .h[time="1"]:before, #clock .h[time="2"]:before, #clock .h[time="3"]:before, #clock .h[time="4"]:before, #clock .h[time="5"]:before, #clock .h[time="6"]:before, #clock .h[time="7"]:before, #clock .h[time="8"]:before, #clock .h[time="9"]:before,
+#clock .m[time="0"]:before, #clock .m[time="1"]:before, #clock .m[time="2"]:before, #clock .m[time="3"]:before, #clock .m[time="4"]:before, #clock .m[time="5"]:before, #clock .m[time="6"]:before, #clock .m[time="7"]:before, #clock .m[time="8"]:before, #clock .m[time="9"]:before,
+#clock .s[time="0"]:before, #clock .s[time="1"]:before, #clock .s[time="2"]:before, #clock .s[time="3"]:before, #clock .s[time="4"]:before, #clock .s[time="5"]:before, #clock .s[time="6"]:before, #clock .s[time="7"]:before, #clock .s[time="8"]:before, #clock .s[time="9"]:before {
+	content: "0" attr(time);
+}
+#clock .h:after,
+#clock .m:after {
+	content: ":";
+}
