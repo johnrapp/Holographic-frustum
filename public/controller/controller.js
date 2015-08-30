@@ -1,4 +1,8 @@
-angular.module('app', ['ngMaterial'])
+'use strict';
+angular.module('app', ['ngMaterial', 'lib'])
+.config(['socketProvider', function(socketProvider) {
+	socketProvider.namespace = 'controller';
+}])
 .controller('controller', ['$scope', function($scope) {
 	$scope.refresh = function() {
 		socket.emit('refreshDisplay');
@@ -6,33 +10,32 @@ angular.module('app', ['ngMaterial'])
 	$scope.rotate = function() {
 		socket.emit('rotateDisplay');
 	};
+}])
+.directive('touchArea', ['socket', function(socket) {
+	return {
+		restrict: 'A',
+		link: function(scope, element, attr) {
+			element[0].addEventListener('touchstart', function(e) {
+				var touch = e.touches[0];
+				var position = {x: touch.clientX, y: touch.clientY};
+
+				socket.emit('touchstart', position);
+			}, false);
+
+			element[0].addEventListener('touchend', function(e) {
+				socket.emit('touchend');
+			}, false);
+			
+			element[0].addEventListener('touchcancel', function(e) {
+				socket.emit('touchend');
+			}, false);
+			
+			element[0].addEventListener('touchmove', function(e) {
+				var touch = e.touches[0];
+				var position = {x: touch.clientX, y: touch.clientY};
+				// console.log(position);
+				socket.emit('touchmove', position);
+			}, false);
+		}
+	}
 }]);
-
-var socket = io('/controller');
-	
-function debug(text) {
-	$('#debug').textContent += text + '\n';
-}
-
-window.addEventListener("touchstart", function(e) {
-	// debug('touchstart');
-	var touch = e.touches[0];
-	var position = {x: touch.clientX, y: touch.clientY};
-	// console.log(position);
-	socket.emit('touchstart', position);
-}, false);
-window.addEventListener("touchend", function(e) {
-	// debug('touchend');
-	socket.emit('touchend');
-}, false);
-window.addEventListener("touchcancel", function(e) {
-	// debug('touchcancel');
-	socket.emit('touchend');
-}, false);
-window.addEventListener("touchmove", function(e) {
-	// debug('touchmove');
-	var touch = e.touches[0];
-	var position = {x: touch.clientX, y: touch.clientY};
-	// console.log(position);
-	socket.emit('touchmove', position);
-}, false);

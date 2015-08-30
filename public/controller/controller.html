@@ -6,12 +6,11 @@
 
 	<title></title>
 	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-	<script src="/lib/lib.js"></script>
 
 	<!-- <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/0.10.0/angular-material.min.css"> -->
 	<link rel="stylesheet" href="/lib/angular-material.css">
 </head>
-<body ng-controller="controller">
+<body ng-controller="controller" touch-area>
 
 <md-button id="refresh" ng-click="refresh()">Refresh</md-button>
 <md-button id="rotate" ng-click="rotate()">Rotate</md-button>
@@ -29,7 +28,8 @@
 <script src="/lib/angular-material.js"></script>
 
 
-<script type="text/javascript" src="controller.js"></script>
+<script src="/lib/lib.js"></script>
+<script src="controller.js"></script>
 
 </body>
 </html>
