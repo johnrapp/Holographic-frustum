@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<meta name="theme-color" content="#000000">
+
+	<title></title>
+	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+	<script src="lib.js"></script>
+</head>
+<body>
+
+	<button id="refresh">Refresh</button>
+	<button id="rotate">Rotate</button>
+
+	<pre id="debug"></pre>
+
+	<script type="text/javascript">
+		var socket = io('/controller');
+			
+		$('button#refresh').addEventListener('click', function(e) {
+			socket.emit('refreshDisplay');
+		});
+		$('button#rotate').addEventListener('click', function(e) {
+			socket.emit('rotateDisplay');
+		});
+
+		function debug(text) {
+			$('#debug').textContent += text + '\n';
+		}
+
+		window.addEventListener("touchstart", function(e) {
+			// debug('touchstart');
+			var touch = e.touches[0];
+			var position = {x: touch.clientX, y: touch.clientY};
+			// console.log(position);
+			socket.emit('touchstart', position);
+		}, false);
+		window.addEventListener("touchend", function(e) {
+			// debug('touchend');
+			socket.emit('touchend');
+		}, false);
+		window.addEventListener("touchcancel", function(e) {
+			// debug('touchcancel');
+			socket.emit('touchend');
+		}, false);
+		window.addEventListener("touchmove", function(e) {
+			// debug('touchmove');
+			var touch = e.touches[0];
+			var position = {x: touch.clientX, y: touch.clientY};
+			// console.log(position);
+			socket.emit('touchmove', position);
+		}, false);
+
+	</script>
+</body>
+</html>
