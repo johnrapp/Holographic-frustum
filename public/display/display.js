@@ -1,16 +1,59 @@
-var socket = io('/display');
-socket.on('refresh', function() {
-	location.reload();
-});
-
-socket.on('disconnect', function() {
-	setTimeout(function() {
+'use strict';
+angular.module('app', ['ngMaterial', 'lib'])
+.config(['socketProvider', function(socketProvider) {
+	socketProvider.namespace = 'display';
+}])
+.run(['socket', function(socket) {
+	socket.on('refresh', function() {
 		location.reload();
-	}, 3000);
-});
+	});
 
-angular.module('app', ['ngMaterial'])
-.directive('cube', [function() {
+	socket.on('disconnect', function() {
+		setTimeout(function() {
+			location.reload();
+		}, 3000);
+	});
+
+	socket.on('rotate', function() {
+		var child = container.querySelector('div:first-child');
+		container.removeChild(child);
+		container.appendChild(child);
+	});
+}])
+.factory('touch', ['socket', function(socket) {
+	var tap = null;
+
+	socket.on('touchstart', function(position) {
+		tap = position;
+	});
+	socket.on('touchmove', function(position) {
+		tap = position;
+	});
+	socket.on('touchend', function() {
+		tap = null;
+	});
+
+	return {getTap: function() {
+		return tap;
+	}};
+}])
+.factory('size', ['$window', function($window) {
+	return Math.min($window.innerWidth, $window.innerHeight);
+}])
+.directive('fullscreenOnClick', [function() {
+	return {
+		restrict: 'A',
+		link: function(scope, element, attr) {
+			element.on('click', function() {
+				element[0].webkitRequestFullScreen();
+			});
+		}
+	};
+}])
+.run(['size', function(size) {
+	window.initCube(size);
+}])
+.directive('cube', ['size', function(size) {
 	return {
 		restrict: 'E',
 		replace: true,
@@ -56,7 +99,7 @@ angular.module('app', ['ngMaterial'])
 		}
 	};
 }])
-.directive('animationTest', [function() {
+.directive('animationTest', ['size', function(size) {
 	return {
 		restrict: 'E',
 		replace: true,
@@ -83,7 +126,7 @@ angular.module('app', ['ngMaterial'])
 		}
 	};
 }])
-.directive('touchTest', [function() {
+.directive('touchTest', ['touch', 'size', function(touch, size) {
 	return {
 		restrict: 'E',
 		replace: true,
@@ -98,6 +141,7 @@ angular.module('app', ['ngMaterial'])
 				ctx.clearRect(0, 0, size, size);
 
 				ctx.fillStyle = '#f00';
+				var tap = touch.getTap();
 				if(tap) {
 					ctx.fillRect(tap.x, tap.y, 50, 50);
 				}
@@ -107,41 +151,3 @@ angular.module('app', ['ngMaterial'])
 		}
 	};
 }]);
-
-var container = $('#container');
-var size = Math.min(window.innerWidth, window.innerHeight);
-var middle = size / 2;
-
-window.addEventListener('click', function(e) {
-	container.webkitRequestFullScreen();
-});
-
-var tap = null;
-
-socket.on('touchstart', function(position) {
-	tap = position;
-});
-socket.on('touchmove', function(position) {
-	tap = position;
-});
-socket.on('touchend', function() {
-	tap = null;
-});
-socket.on('rotate', function() {
-	var child = container.querySelector('div:first-child');
-	container.removeChild(child);
-	container.appendChild(child);
-});
-
-// requestAnimationFrame(function render(time) {
-// 	renderScreens.forEach(function(renderScreen, i) {
-// 		var ctx = ctxes[i];
-// 		ctx.clearRect(0, 0, size, size);
-	
-
-// 		renderScreen(ctx, time);
-// 	});
-
-// 	requestAnimationFrame(render);
-	
-// });
