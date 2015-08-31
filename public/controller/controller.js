@@ -3,7 +3,7 @@ angular.module('app', ['ngMaterial', 'lib'])
 .config(['socketProvider', function(socketProvider) {
 	socketProvider.namespace = 'controller';
 }])
-.controller('controller', ['$scope', function($scope) {
+.controller('controller', ['$scope', 'socket', function($scope, socket) {
 	$scope.refresh = function() {
 		socket.emit('refreshDisplay');
 	};

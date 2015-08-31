@@ -36,15 +36,24 @@ canvas {
 /*#front*/ #container div:nth-child(1) {
 	/*background: blue;*/
 }
+/*#front*/ #container div:nth-child(1).mirrored {
+	transform: rotateZ(0deg) rotateY(180deg);
+}
 /*#left*/ #container div:nth-child(2) {
 	/*background: red;*/
 	transform: rotate(-90deg);
 	left: -25%;
 }
+/*#left*/ #container div:nth-child(2).mirrored {
+	transform: rotateZ(-90deg) rotateY(180deg);
+}
 /*#right*/ #container div:nth-child(4) {
 	/*background: green;*/
 	transform: rotate(90deg);
 	right: -25%;
+}
+/*#right*/ #container div:nth-child(4).mirrored {
+	transform: rotateZ(90deg) rotateY(180deg);
 }
 /*#back*/ #container div:nth-child(3) {
 	/*background: yellow;*/
@@ -52,6 +61,9 @@ canvas {
 	bottom: 0;
 	left: 0;
 	right: 0;
+}
+/*#back*/ #container div:nth-child(3).mirrored {
+	transform: rotateZ(180deg) rotateY(180deg);
 }
 
 .side {
