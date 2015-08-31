@@ -25,10 +25,22 @@ window.initCube = function(size) {
 
 	var cubeTransformation = mat4.create();
 	var pyramidTransformation = mat4.create();
+	window.cubeTransformation = cubeTransformation;
+
+	var rotation = {x: 0, y: 0, z: 0};
+	var scale = vec3.fromValues(1, 1, 1);
 
 	function update(time) {
-		mat4.rotateX(globalTransformation, globalTransformation, deg(1));
-		mat4.rotateY(globalTransformation, globalTransformation, deg(0.5));
+		// mat4.rotateX(globalTransformation, globalTransformation, deg(1));
+		// mat4.rotateY(globalTransformation, globalTransformation, deg(0.5));
+
+		mat4.identity(cubeTransformation);
+		// mat4.scale(cubeTransformation, cubeTransformation, scale);
+		mat4.scale(cubeTransformation, cubeTransformation, scale);
+	
+		mat4.rotateX(cubeTransformation, cubeTransformation, deg(rotation.x));
+		mat4.rotateY(cubeTransformation, cubeTransformation, deg(rotation.y));
+		mat4.rotateZ(cubeTransformation, cubeTransformation, deg(rotation.z));
 	}
 
 	function render() {
@@ -73,11 +85,12 @@ window.initCube = function(size) {
 		mat4.rotateY(globalTransformation, globalTransformation, deg(y));
 	}
 
+	window.setCubeRotation = function(x, y, z) {
+		rotation = {x: x, y: y, z: z};
+	}
 
-	window.setCubeRotation = function(x, y) {
-		mat4.identity(cubeTransformation);
-		mat4.rotateX(cubeTransformation, cubeTransformation, deg(x));
-		mat4.rotateY(cubeTransformation, cubeTransformation, deg(y));
+	window.setCubeScale = function(zoom) {
+		vec3.set(scale, zoom, zoom, zoom);
 	}
 
 	function push(ctx, fn) {
@@ -92,7 +105,7 @@ window.initCube = function(size) {
 	var ctx;
 	window.renderCube = function(_ctx, time) {
 		ctx = _ctx;
-		// update(time);
+		update(time);
 		render();
 	};
 }

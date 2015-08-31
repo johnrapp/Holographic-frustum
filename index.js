@@ -42,4 +42,14 @@ controller.on('connection', function(socket) {
 	socket.on('touchmove', function(position) {
 		display.emit('touchmove', position);
 	});
+
+	socket.on('pan', function(delta) {
+		display.emit('pan', delta);
+	});
+	socket.on('scale', function(scale) {
+		display.emit('scale', scale);
+	});
+	socket.on('rotateCube', function(rotation) {
+		display.emit('rotateCube', rotation);
+	});
 });

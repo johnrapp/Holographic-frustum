@@ -33,9 +33,36 @@ angular.module('app', ['ngMaterial', 'lib'])
 		tap = null;
 	});
 
-	return {getTap: function() {
-		return tap ? {x: tap.x * size, y: tap.y * size / 2} : null;
-	}};
+	var delta = {x: 0, y: 0};
+	socket.on('pan', function(_delta) {
+		delta = _delta;
+	});
+
+	var scale = 1;
+	socket.on('scale', function(_scale) {
+		scale = _scale;
+	});
+
+	var rotation = 0;
+	socket.on('rotateCube', function(_rotation) {
+		rotation = _rotation;
+	});
+	return {
+		getTap: function() {
+			return tap ? {x: tap.x * size, y: tap.y * size / 2} : null;
+		},
+		getPanDelta: function() {
+			var _delta = delta;
+			delta = {x: 0, y: 0};
+			return _delta;
+		},
+		getScale: function() {
+			return scale;
+		},
+		getRotation: function() {
+			return rotation;
+		}
+	};
 }])
 .factory('size', ['$window', function($window) {
 	return Math.min($window.innerWidth, $window.innerHeight);
@@ -150,7 +177,7 @@ angular.module('app', ['ngMaterial', 'lib'])
 		}
 	};
 }])
-.directive('touchCube', ['touch', 'size', function(touch, size) {
+.directive('touchCube', ['touch', 'size', 'socket', function(touch, size, socket) {
 	return {
 		restrict: 'E',
 		replace: true,
@@ -161,9 +188,7 @@ angular.module('app', ['ngMaterial', 'lib'])
 			canvas.height = size / 2;
 			var ctx = canvas.getContext('2d');
 
-			var prevTap = touch.getTap();
-
-			var rotation = {x: 0, y: 0};
+			var rotation = {x: 0, y: 0, z: 0};
 
 			requestAnimationFrame(function render(time) {
 				ctx.clearRect(0, 0, size, size);
@@ -171,15 +196,13 @@ angular.module('app', ['ngMaterial', 'lib'])
 				window.renderCube(ctx, time);
 
 				ctx.fillStyle = '#f00';
-				var tap = touch.getTap();
-				if(tap && prevTap) {
-					var delta = {x: tap.x - prevTap.x, y: tap.y - prevTap.y};
-					rotation.x += delta.y;
-					rotation.y += delta.x;
-					window.setCubeRotation(rotation.x, rotation.y);
-				}
-
-				prevTap = tap;
+				var delta = touch.getPanDelta();
+				rotation.x += delta.y;
+				rotation.y += delta.x;
+				rotation.z = touch.getRotation();
+				window.setCubeRotation(rotation.x * 100, rotation.y * 100, -rotation.z);
+				var scale = touch.getScale();
+				window.setCubeScale(scale);
 
 				requestAnimationFrame(render);
 			});
