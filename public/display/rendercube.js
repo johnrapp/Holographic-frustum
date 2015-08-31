@@ -68,6 +68,18 @@ window.initCube = function(size) {
 		});
 	}
 
+	window.rotateCube = function(x, y) {
+		mat4.rotateX(globalTransformation, globalTransformation, deg(x));
+		mat4.rotateY(globalTransformation, globalTransformation, deg(y));
+	}
+
+
+	window.setCubeRotation = function(x, y) {
+		mat4.identity(cubeTransformation);
+		mat4.rotateX(cubeTransformation, cubeTransformation, deg(x));
+		mat4.rotateY(cubeTransformation, cubeTransformation, deg(y));
+	}
+
 	function push(ctx, fn) {
 		ctx.save();
 		fn();
@@ -80,7 +92,7 @@ window.initCube = function(size) {
 	var ctx;
 	window.renderCube = function(_ctx, time) {
 		ctx = _ctx;
-		update(time);
+		// update(time);
 		render();
 	};
 }

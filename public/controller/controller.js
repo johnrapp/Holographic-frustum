@@ -17,7 +17,7 @@ angular.module('app', ['ngMaterial', 'lib'])
 		link: function(scope, element, attr) {
 			element[0].addEventListener('touchstart', function(e) {
 				var touch = e.touches[0];
-				var position = {x: touch.clientX, y: touch.clientY};
+				var position = {x: touch.clientX / element[0].offsetWidth, y: touch.clientY / element[0].offsetHeight};
 
 				socket.emit('touchstart', position);
 			}, false);
@@ -32,8 +32,8 @@ angular.module('app', ['ngMaterial', 'lib'])
 			
 			element[0].addEventListener('touchmove', function(e) {
 				var touch = e.touches[0];
-				var position = {x: touch.clientX, y: touch.clientY};
-				// console.log(position);
+				var position = {x: touch.clientX / element[0].offsetWidth, y: touch.clientY / element[0].offsetHeight};
+
 				socket.emit('touchmove', position);
 			}, false);
 		}

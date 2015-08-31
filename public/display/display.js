@@ -20,7 +20,7 @@ angular.module('app', ['ngMaterial', 'lib'])
 		container.appendChild(child);
 	});
 }])
-.factory('touch', ['socket', function(socket) {
+.factory('touch', ['socket', 'size', function(socket, size) {
 	var tap = null;
 
 	socket.on('touchstart', function(position) {
@@ -34,7 +34,7 @@ angular.module('app', ['ngMaterial', 'lib'])
 	});
 
 	return {getTap: function() {
-		return tap;
+		return tap ? {x: tap.x * size, y: tap.y * size / 2} : null;
 	}};
 }])
 .factory('size', ['$window', function($window) {
@@ -78,7 +78,6 @@ angular.module('app', ['ngMaterial', 'lib'])
 	return {
 		restrict: 'E',
 		replace: true,
-		// template: '<div id="clock"><span class="h" h="{{h}}">{{h}}</span><span class="m" m="{{m}}">{{h}}</span><span class="s" s="{{s}}">{{h}}</span></div>',
 		template: '<div id="clock"><span class="h" time="{{h}}"></span><span class="m" time="{{m}}"></span><span class="s" time="{{s}}"></span></div>',
 		link: function(scope, element, attr) {
 			var h = element.find('.h');
@@ -145,6 +144,42 @@ angular.module('app', ['ngMaterial', 'lib'])
 				if(tap) {
 					ctx.fillRect(tap.x, tap.y, 50, 50);
 				}
+
+				requestAnimationFrame(render);
+			});
+		}
+	};
+}])
+.directive('touchCube', ['touch', 'size', function(touch, size) {
+	return {
+		restrict: 'E',
+		replace: true,
+		template: '<canvas></canvas>',
+		link: function(scope, element, attr) {
+			var canvas = element[0];
+			canvas.width = size;
+			canvas.height = size / 2;
+			var ctx = canvas.getContext('2d');
+
+			var prevTap = touch.getTap();
+
+			var rotation = {x: 0, y: 0};
+
+			requestAnimationFrame(function render(time) {
+				ctx.clearRect(0, 0, size, size);
+
+				window.renderCube(ctx, time);
+
+				ctx.fillStyle = '#f00';
+				var tap = touch.getTap();
+				if(tap && prevTap) {
+					var delta = {x: tap.x - prevTap.x, y: tap.y - prevTap.y};
+					rotation.x += delta.y;
+					rotation.y += delta.x;
+					window.setCubeRotation(rotation.x, rotation.y);
+				}
+
+				prevTap = tap;
 
 				requestAnimationFrame(render);
 			});
