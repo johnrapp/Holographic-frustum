@@ -200,7 +200,7 @@ angular.module('app', ['ngMaterial', 'lib'])
 				rotation.x += delta.y;
 				rotation.y += delta.x;
 				rotation.z = touch.getRotation();
-				window.setCubeRotation(rotation.x * 100, rotation.y * 100, -rotation.z);
+				window.setCubeRotation(rotation.x, rotation.y, -rotation.z);
 				var scale = touch.getScale();
 				window.setCubeScale(scale);
 

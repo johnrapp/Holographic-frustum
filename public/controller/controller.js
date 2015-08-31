@@ -43,17 +43,21 @@ angular.module('app', ['ngMaterial', 'lib'])
 
 			hammertime.get('pan').set({ direction: Hammer.DIRECTION_ALL });
 
-			var prevTouch = null;
-			hammertime.on('pan', function(e) {
-				// console.log('pan', e);
-				var touch = e.pointers[0];
-				if(prevTouch) {
-					var delta = {x: touch.clientX - prevTouch.clientX, y: touch.clientY - prevTouch.clientY};
-					// console.log(delta);
-					socket.emit('pan', {x: delta.x / element[0].offsetWidth, y: delta.y / element[0].offsetHeight});
+			var position = null;
+			hammertime.on('panstart', function(e) {
+				position = {x: e.deltaX, y: e.deltaY};
+			});
+			hammertime.on('panend', function(e) {
+				position = null;
+			});
+
+			hammertime.on('panmove', function(e) {
+				if(position) {
+					var delta = {x: (e.deltaX - position.x), y: (e.deltaY - position.y)};
+					console.log(e.deltaX, e.deltaY);
+					socket.emit('pan', delta);
+					position = {x: e.deltaX, y: e.deltaY};
 				}
-				prevTouch = touch;
-				// socket.emit('pan', {x: e.deltaX / element[0].offsetWidth, y: e.deltaY / element[0].offsetHeight});
 			});
 
 			hammertime.on('rotate', function(e) {
