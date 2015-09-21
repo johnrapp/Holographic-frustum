@@ -25,7 +25,6 @@ window.initCube = function(size) {
 
 	var cubeTransformation = mat4.create();
 	var pyramidTransformation = mat4.create();
-	window.cubeTransformation = cubeTransformation;
 
 	var rotation = {x: 0, y: 0, z: 0};
 	var scale = vec3.fromValues(1, 1, 1);
