@@ -14,20 +14,22 @@
 	<link rel="stylesheet" type="text/css" href="display.css">
 </head>
 <body>
-<div id="container" fullscreen-on-click>
-	<!-- <div id="front" class="side"> -->
-	<div id="front" class="side mirrored">
-		<star-field></star-field>
+<div id="container">
+<!-- <div id="container" fullscreen-on-click> -->
+	<div id="front" class="side">
+	<!-- <div id="front" class="side mirrored"> -->
+		<curve-fever></curve-fever>
+		<!-- <star-field></star-field> -->
 	</div>
-	<div id="right" class="side mirrored">
+	<!-- <div id="right" class="side mirrored">
 		<clock></clock>
 	</div>
 	<div id="back" class="side mirrored">
-		<!-- <touch-cube></touch-cube> -->
+		<touch-cube></touch-cube>
 	</div>
 	<div id="left" class="side mirrored">
 		<animation-test></animation-test>
-	</div>
+	</div> -->
 </div>
 
 <script src="/lib/angular.js"></script>
@@ -36,6 +38,12 @@
 <script src="/lib/angular-material.js"></script>
 
 <script src="/lib/lib.js"></script>
+<script src="/lib/three.js"></script>
+<script src="/lib/obj-loader.js"></script>
+<script src="/lib/mtl-loader.js"></script>
+<script src="/lib/obj-mtl-loader.js"></script>
+<script src="/lib/SceneLoader.js"></script>
+
 <script src="display.js"></script>
 <script src="rendercube.js"></script>
 </body>
