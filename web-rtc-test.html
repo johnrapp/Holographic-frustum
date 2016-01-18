@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+
+<div>
+	<h4>Recieve</h4>
+	<div id="receive"></div>
+	<script src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
+	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+	<script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+</div>
+<div>
+	<h4>Send</h4>
+	<textarea class="send"></textarea>
+</div>
+<div><button class="send">Send</button></div>
+
+<script type="text/javascript">
+	var peer = new Peer(GUID(), {host: 'localhost', port: 8088, path: '/peerjs'});
+
+	function connectionCallback(conn) {
+		// Receive messages
+		conn.on('data', function(data) {
+			console.log('Received', data);
+		});
+
+		// Send messages
+		conn.send('Hello!');
+ 	}
+
+	function onConnect(id, callback) {
+
+		// $.ajax({
+		// 	type: 'POST',
+		// 	url: 'http://localhost:8088/register',
+		// 	data: {id: id},
+		// 	dataType: 'json',
+		// 	success: function(response) {
+		// 		console.log(response);
+		// 	}
+		// });
+
+	}
+
+	var socket = io('/peerjs');
+
+	peer.on('open', function(id) {
+	  console.log('My peer ID is: ' + id);
+	  socket.emit('register', {id: id});
+	  onConnect(id, connectionCallback);
+	});
+
+	function GUID() {
+		var S4 = function() {
+			return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+		};
+		return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+	}
+
+	// var conn = peer.connect('dest-peer-id');
+
+	// peer.on('connection', function(conn) {
+
+	// });
+</script>
+</body>
+</html>
