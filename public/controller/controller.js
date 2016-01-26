@@ -67,6 +67,13 @@ angular.module('app', ['ngMaterial', 'lib'])
 			hammertime.on('pinch', function(e) {
 				socket.emit('scale', e.scale);
 			});
+
+			var scale = 1;
+			document.addEventListener('mousewheel', function(e) {
+				scale += e.wheelDelta / 120 * 0.05;
+				socket.emit('scale', scale);
+			});
+
 		}
 	}
 }]);

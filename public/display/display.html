@@ -8,25 +8,31 @@
 	<title></title>
 	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
 	<script src="/lib/matrix.js"></script>
+	<script src="/lib/three.js"></script>
 
 	<link rel="stylesheet" href="/lib/angular-material.css">
 
 	<link rel="stylesheet" type="text/css" href="display.css">
+
+	<script src="http://jsconsole.com/remote.js?A16DC6A3-643A-4CBB-81CC-ED0033D088A8"></script>
 </head>
 <body>
 <div id="container" fullscreen-on-click>
 	<!-- <div id="front" class="side"> -->
-	<div id="front" class="side mirrored">
-		<star-field></star-field>
+	<div id="front" class="side">
+		<!-- <test-game2></test-game2> -->
+		<test-game3></test-game3>
+		<!-- <star-field></star-field> -->
 	</div>
-	<div id="right" class="side mirrored">
-		<clock></clock>
+	<div id="right" class="side">
+		<!-- <clock></clock> -->
 	</div>
-	<div id="back" class="side mirrored">
+	<div id="back" class="side">
+		<!-- <test-game></test-game> -->
 		<!-- <touch-cube></touch-cube> -->
 	</div>
-	<div id="left" class="side mirrored">
-		<animation-test></animation-test>
+	<div id="left" class="side">
+		<!-- <animation-test></animation-test> -->
 	</div>
 </div>
 

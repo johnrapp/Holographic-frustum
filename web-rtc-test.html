@@ -2,55 +2,105 @@
 <html>
 <head>
 	<title></title>
+	<style type="text/css">
+		#container {
+			width: 600px;
+			margin: auto;
+		}
+		#info {
+			font-size: 25px;
+			margin-bottom: 5px;
+		}
+		#messages {
+
+		}
+		#messages .message {
+			border: 1px solid black;
+		}
+		#send {
+			height: 200px;
+		}
+		#send textarea {
+			display: block;
+			width: 100%;
+		    box-sizing: border-box;
+		}
+		#send button, #send textarea {
+			/*height: 100%;*/
+		}
+	</style>
 </head>
 <body>
 
-<div>
-	<h4>Recieve</h4>
-	<div id="receive"></div>
-	<script src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
-	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-	<script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+<script src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
+<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+<script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>	
+
+<div id="container">
+	<div id="info">
+		<div id="host"></div>
+		<div id="id"></div>
+	</div>
+	<div id="messages"></div>
+	<div id="send">
+		<textarea></textarea>
+		<button>Send</button>
+	</div>
 </div>
-<div>
-	<h4>Send</h4>
-	<textarea class="send"></textarea>
-</div>
-<div><button class="send">Send</button></div>
+
 
 <script type="text/javascript">
-	var peer = new Peer(GUID(), {host: 'localhost', port: 8088, path: '/peerjs'});
+
+	var $messages = $('#messages');
+
+	var $sendButton = $('#send button');
+	var $message = $('#send textarea');
+
+	var $host = $('#host');
+	var $id = $('#id');
+
+	var peer = new Peer(GUID(), {host: '192.168.1.70', port: 8088, path: '/peerjs'});
+	// var peer = new Peer(GUID(), {host: 'localhost', port: 8088, path: '/peerjs'});
+
+	function appendMessage(text) {
+		$messages.append(
+			$('<div class="message">').text(text)
+		);
+	}
 
 	function connectionCallback(conn) {
-		// Receive messages
-		conn.on('data', function(data) {
-			console.log('Received', data);
+		conn.on('open', function() {
+			appendMessage('Connected!');
+			$sendButton.click(function() {
+				conn.send($message.val());
+			});
 		});
-
-		// Send messages
-		conn.send('Hello!');
+		conn.on('data', function(data) {
+			appendMessage(data);
+			console.log(data);
+		});
  	}
-
-	function onConnect(id, callback) {
-
-		// $.ajax({
-		// 	type: 'POST',
-		// 	url: 'http://localhost:8088/register',
-		// 	data: {id: id},
-		// 	dataType: 'json',
-		// 	success: function(response) {
-		// 		console.log(response);
-		// 	}
-		// });
-
-	}
 
 	var socket = io('/peerjs');
 
+	var host = location.hash == '#host';
 	peer.on('open', function(id) {
-	  console.log('My peer ID is: ' + id);
-	  socket.emit('register', {id: id});
-	  onConnect(id, connectionCallback);
+		console.log('My peer ID is: ' + id);
+		socket.emit('register', {id: id, host: host});
+		$id.text(id);
+	});
+
+	socket.on('peer', function(data) {
+		if(host) {
+			$host.text('Host');
+			peer.on('connection', function(conn) {
+				connectionCallback(conn);
+			});
+		} else {
+			$host.text('Guest');
+			var conn = peer.connect(data.id);
+			connectionCallback(conn);
+		}
 	});
 
 	function GUID() {
