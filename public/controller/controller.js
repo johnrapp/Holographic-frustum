@@ -43,18 +43,32 @@ angular.module('app', ['ngMaterial', 'lib'])
 
 			hammertime.get('pan').set({ direction: Hammer.DIRECTION_ALL });
 
+			var t = null;
+
 			var position = null;
 			hammertime.on('panstart', function(e) {
 				position = {x: e.deltaX, y: e.deltaY};
+
+				t = {x: e.center.x + e.deltaX - 28, y: e.center.y + e.deltaY - 36 - 34};
+				console.log(t);
+				socket.emit('touchmove', t);
 			});
 			hammertime.on('panend', function(e) {
 				position = null;
+				socket.emit('touchend');
 			});
 
 			hammertime.on('panmove', function(e) {
+
+				if(t) {
+					t = {x: e.deltaX - t.x, y: e.deltaY - t.y};
+					console.log(t);
+					socket.emit('touchmove', t);
+				}
+
 				if(position) {
 					var delta = {x: (e.deltaX - position.x), y: (e.deltaY - position.y)};
-					console.log(e.deltaX, e.deltaY);
+					// console.log(e.deltaX, e.deltaY);
 					socket.emit('pan', delta);
 					position = {x: e.deltaX, y: e.deltaY};
 				}

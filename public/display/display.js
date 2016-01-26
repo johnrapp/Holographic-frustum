@@ -49,7 +49,8 @@ angular.module('app', ['ngMaterial', 'lib'])
 	});
 	return {
 		getTap: function() {
-			return tap ? {x: tap.x * size, y: tap.y * size / 2} : null;
+			return tap ? {x: tap.x, y: tap.y} : null;
+			// return tap ? {x: tap.x * size, y: tap.y * size / 2} : null;
 		},
 		getPanDelta: function() {
 			var _delta = delta;
@@ -72,8 +73,7 @@ angular.module('app', ['ngMaterial', 'lib'])
 		restrict: 'A',
 		link: function(scope, element, attr) {
 			element.on('click', function() {
-				console.log(Object.keys(element[0].__proto__.__proto__.__proto__));
-				// element[0].webkitRequestFullScreen();
+				element[0].webkitRequestFullScreen();
 			});
 		}
 	};
@@ -341,129 +341,6 @@ angular.module('app', ['ngMaterial', 'lib'])
 		}
 	};
 }])
-.directive('testGame', ['touch', 'size', 'socket', function(touch, size, socket) {
-	return {
-		restrict: 'E',
-		replace: true,
-		template: '<div></div>',
-		link: function(scope, element, attr) {
-			var w = size, h = size / 2;
-
-			var scene = new THREE.Scene();
-			var camera = new THREE.PerspectiveCamera(75, w / h, 0.1, 1000);
-
-			var renderer = new THREE.WebGLRenderer();
-			renderer.setSize(w, h);
-			element.append(renderer.domElement);
-
-			var geometry = new THREE.BoxGeometry(1, 1, 1);
-			// var material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-			var material = new THREE.MeshLambertMaterial({ color: 0xffffff });
-			// var material = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true });
-			// material.opacity = 0.01;
-			var cube = new THREE.Mesh(geometry, material);
-			cube.position.set(0, 0, 0);
-			scene.add(cube);
-
-			var geometry2 = new THREE.BoxGeometry(100, 100, 1);
-			var material2 = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-			var cube2 = new THREE.Mesh(geometry2, material2);
-			cube2.position.set(0, 0, -20);
-			scene.add(cube2);
-
-			var geometry3 = new THREE.BoxGeometry(2, 1, 1);
-			var material3 = new THREE.MeshBasicMaterial({ color: 0xaaaaaa, transparent: true  });
-			material3.opacity = 0.7;
-			var cube3 = new THREE.Mesh(geometry3, material3);
-			cube3.position.set(0, 0, 1);
-			scene.add(cube3);
-
-			var geometry4 = new THREE.BoxGeometry(2, 1, 1);
-			var material4 = new THREE.MeshBasicMaterial({ color: 0xaaaaaa, transparent: true  });
-			material4.opacity = 0.7;
-			var cube4 = new THREE.Mesh(geometry4, material4);
-			cube4.position.set(0, 0, 1);
-			scene.add(cube4);
-
-			var geometry5 = new THREE.BoxGeometry(1, 1, 10);
-			var material5 = new THREE.MeshBasicMaterial({ color: 0xaaaaaa, transparent: true  });
-			var cube5 = new THREE.Mesh(geometry5, material5);
-			cube5.position.set(0, 0, 0);
-			scene.add(cube5);
-
-			// var geometry6 = new THREE.BoxGeometry(0.3, 0.15, 0.0001);
-			// var material6 = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-			// var cube6 = new THREE.Mesh(geometry6, material6);
-			// cube6.position.set(0, 0, 5-0.1001);
-			// scene.add(cube6);
-
-			var geometry7 = new THREE.BoxGeometry(1, 2, 6);
-			var material7 = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true  });
-			material7.opacity = 0.9;
-			var cube7 = new THREE.Mesh(geometry7, material7);
-			cube7.position.set(-1, 0, 6-3);
-			scene.add(cube7);
-
-			var geometry8 = new THREE.BoxGeometry(1, 2, 6);
-			var material8 = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true  });
-			material8.opacity = 0.9;
-			var cube8 = new THREE.Mesh(geometry8, material8);
-			cube8.position.set(1, 0, 6-3);
-			scene.add(cube8);
-
-			var geometry9 = new THREE.BoxGeometry(1, 1, 6);
-			var material9 = new THREE.MeshBasicMaterial({ color: 0x0000ff, transparent: true  });
-			material9.opacity = 0.9;
-			var cube9 = new THREE.Mesh(geometry9, material9);
-			cube9.position.set(0, -1, 6-3);
-			scene.add(cube9);
-
-			var geometry10 = new THREE.BoxGeometry(1, 1, 6);
-			var material10 = new THREE.MeshBasicMaterial({ color: 0x0000ff, transparent: true  });
-			material10.opacity = 0.9;
-			var cube10 = new THREE.Mesh(geometry10, material10);
-			cube10.position.set(0, 1, 6-3);
-			scene.add(cube10);
-
-
-			var light = new THREE.PointLight(0xffffff, 1, 100);
-			light.position.set(0, 0, 5);
-			scene.add(light);
-
-
-			camera.position.z = 5;
-			// camera.position.y = -0.3;
-
-			function update(time) {
-				cube.rotation.x = 0.001 * time;
-				cube.rotation.y = 0.001 * time;
-				// if(object) {
-					// object.position.set(0, 0, 0)
-					// object.rotation.x += 0.1;
-					// object.rotation.y += 0.1;
-					// object.position.set(0, -10, 0)
-				// }
-
-				// function randomInt(x) {return Math.floor(Math.random() * x);}
-				// world[randomInt(a)][randomInt(b)][randomInt(c)].material.color = 0xff0000;
-			}
-
-			// keyboard.listen();
-			// setInterval(function update() {
-
-				
-			// }, 300);
-
-			requestAnimationFrame(function render(time) {
-				update(time);
-				
-				renderer.render(scene, camera);
-
-				requestAnimationFrame(render);
-			});
-		}
-	};
-}])
 .directive('testGame2', ['touch', 'size', 'socket', function(touch, size, socket) {
 	return {
 		restrict: 'E',
@@ -564,7 +441,20 @@ angular.module('app', ['ngMaterial', 'lib'])
 
 			var rotation = {x: 0, y: 0, z: 0};
 
+			var paddlePos = {x: w / 4, y: h*7/9};
+			// var ballPos = {x: 0, y: 0, z: 0};
+		
+			function update(time) {
+				var tap = touch.getTap();
+				if(tap) {
+					paddlePos.x = tap.x;
+					paddlePos.y = tap.y;
+				}
+			}
+
 			requestAnimationFrame(function render(time) {
+				update(time);
+
 				ctx.save();
 				ctx.clearRect(0, 0, w, h);
 
@@ -588,10 +478,6 @@ angular.module('app', ['ngMaterial', 'lib'])
 						var scale = 1 - 2*k;
 						ctx.scale(scale, scale);
 
-						// ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
-						// ctx.fillRect(w/8, h/2, 150, 150);
-						// ctx.fillRect((w/8 - k*w)/scale, (h/2 - k*h)/scale, 150/scale, 150/scale);
-
 						ctx.beginPath();
 
 						ctx.moveTo((0 - k*w) / scale, (0 - k*h) / scale);
@@ -608,9 +494,6 @@ angular.module('app', ['ngMaterial', 'lib'])
 
 						ctx.closePath();
 						ctx.stroke();
-					} else {
-						// ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
-						// ctx.fillRect(w/8, h/2, 150, 150);3
 					}
 
 					ctx.beginPath();
@@ -624,18 +507,16 @@ angular.module('app', ['ngMaterial', 'lib'])
 
 				var k = 0.6;
 				
+				//Back paddle
 				ctx.fillStyle = 'rgba(200, 200, 200, 0.8)';
 				ctx.fillRect(w / 4, h*7/9, w/10, h/9);
 
 				ctx.restore();
 
-				ctx.fillStyle = 'rgba(200, 200, 200, 0.5)';
-				ctx.fillRect(w / 4, h*7/9, w/10, h/9);
-				// ctx.fillRect(w / 4 + w/6, h/8, w/10, h/9);
-
 				ctx.save();
 				ctx.strokeStyle = '#fff';
-				var line = (Math.sin(time / 400) + 1) / 2 * 3;
+				var line = (Math.asin(Math.sin(time / 400)) + Math.PI/2) / Math.PI * 3;
+				// var line = (Math.sin(time / 400) + 1) / 2 * 3;
 				// var line = 2.5;
 				var k = 0.5/lines;
 				var s = 1 - 2*k;
@@ -643,6 +524,7 @@ angular.module('app', ['ngMaterial', 'lib'])
 				var scale = Math.pow(s, line);
 				ctx.scale(scale, scale);
 
+				//Ball line
 				ctx.beginPath();
 				ctx.moveTo(0, 0);
 				ctx.lineTo(0, h);
@@ -651,6 +533,7 @@ angular.module('app', ['ngMaterial', 'lib'])
 				ctx.closePath();
 				ctx.stroke();
 
+				//Ball
 				ctx.fillStyle = '#f00';
 				ctx.beginPath();
 				ctx.arc(w*3/5, h*4/7, h/21, 0, 2 * Math.PI);
@@ -659,6 +542,11 @@ angular.module('app', ['ngMaterial', 'lib'])
 
 				ctx.restore();
 
+				//Front paddle
+				ctx.fillStyle = 'rgba(200, 200, 200, 0.5)';
+				ctx.fillRect(paddlePos.x, paddlePos.y, w/10, h/9);
+				// ctx.fillRect(w / 4, h*7/9, w/10, h/9);
+				// ctx.fillRect(w / 4 + w/6, h/8, w/10, h/9);
 
 				ctx.restore();
 
