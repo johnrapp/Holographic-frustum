@@ -105,3 +105,8 @@ canvas {
 #clock .m:after {
 	content: ":";
 }
+
+#test-game4 {
+	position: absolute;
+	top: 100%;
+}

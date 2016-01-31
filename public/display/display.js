@@ -554,4 +554,213 @@ angular.module('app', ['ngMaterial', 'lib'])
 			});
 		}
 	};
-}]);;
+}])
+.directive('testGame4', ['touch', 'size', 'socket', function(touch, size, socket) {
+	return {
+		restrict: 'E',
+		replace: true,
+		template: '<canvas></canvas>',
+		link: function(scope, element, attr) {
+			var canvas = element[0];
+			var w = size;
+			var h = size / 2;
+			canvas.width = w;
+			canvas.height = h;
+			var ctx = canvas.getContext('2d');
+
+			var rotation = {x: 0, y: 0, z: 0};
+
+			var paddlePos = {x: w / 4, y: h*7/9};
+			// var ballPos = {x: 0, y: 0, z: 0};
+		
+			function update(time) {
+				var tap = touch.getTap();
+				if(tap) {
+					paddlePos.x = tap.x;
+					paddlePos.y = tap.y;
+				}
+			}
+
+			requestAnimationFrame(function render(time) {
+				update(time);
+
+				ctx.save();
+				ctx.clearRect(0, 0, w, h);
+
+				ctx.translate(w / 4, 0);
+				ctx.scale(1/2, 1/2);
+
+				ctx.strokeStyle = '#f00';
+				// ctx.strokeStyle = '#f00';
+				ctx.lineWidth = 10;
+
+				ctx.save();
+
+				var lines = 2;
+				// var lines = 4;
+				for(var i = 0; i < lines; i++) {
+					if(i != 0) {
+						// var k = 0.6;
+						// var k = 0.21213203435596426;
+						var k = 0.12;
+						ctx.translate(k*w, k*h);
+						var scale = 1 - 2*k;
+						ctx.scale(scale, scale);
+
+						ctx.beginPath();
+
+						ctx.moveTo((0 - k*w) / scale, (0 - k*h) / scale);
+						ctx.lineTo(0, 0);
+
+						ctx.moveTo((0 - k*w) / scale, (h - k*h) / scale);
+						ctx.lineTo(0, h);
+
+						ctx.moveTo((w - k*w) / scale, (h - k*h) / scale);
+						ctx.lineTo(w, h);
+
+						ctx.moveTo((w - k*w) / scale, (0 - k*h) / scale);
+						ctx.lineTo(w, 0);
+
+						ctx.closePath();
+						ctx.stroke();
+					}
+
+					ctx.beginPath();
+					ctx.moveTo(0, 0);
+					ctx.lineTo(0, h);
+					ctx.lineTo(w, h);
+					ctx.lineTo(w, 0);
+					ctx.closePath();
+					ctx.stroke();
+				}
+
+				var k = 0.6;
+				
+				//Back paddle
+				// ctx.fillStyle = 'rgba(200, 200, 200, 0.8)';
+				// ctx.fillRect(w / 4, h*7/9, w/10, h/9);
+
+				ctx.restore();
+
+				ctx.save();
+				// ctx.strokeStyle = '#fff';
+				// var line = (Math.asin(Math.sin(time / 400)) + Math.PI/2) / Math.PI * 3;
+				// var line = (Math.sin(time / 400) + 1) / 2 * 3;
+				var line = 1;
+				var linePos = (Math.asin(Math.sin(time / 400)) + Math.PI/2) / Math.PI * w;
+				// var linePos = w * 2/3;
+				var k = 0.12;
+				var s = 1 - 2*k;
+				ctx.translate(k*w*(Math.pow(s, line) - 1)/(s-1), k*h*(Math.pow(s, line) - 1)/(s-1));
+				var scale = Math.pow(s, line);
+				ctx.scale(scale, scale);
+
+				//Side line
+				ctx.beginPath();
+
+				ctx.moveTo((w/3 - k*w) / scale, (0 - k*h) / scale);
+				ctx.lineTo(w/3, 0);
+
+				ctx.moveTo((w/3 - k*w) / scale, (h - k*h) / scale);
+				ctx.lineTo(w/3, h);
+
+				ctx.moveTo((w*2/3 - k*w) / scale, (h - k*h) / scale);
+				ctx.lineTo(w*2/3, h);
+
+				ctx.moveTo((w*2/3 - k*w) / scale, (0 - k*h) / scale);
+				ctx.lineTo(w*2/3, 0);
+
+				ctx.moveTo(w/3, 0);
+				ctx.lineTo(w/3, h);
+
+				ctx.moveTo(w*2/3, 0);
+				ctx.lineTo(w*2/3, h);
+
+				ctx.moveTo((w/3 - k*w) / scale, (0 - k*h) / scale);
+				ctx.lineTo((w/3 - k*w) / scale, (h - k*h) / scale);
+
+				ctx.moveTo((w*2/3 - k*w) / scale, (0 - k*h) / scale);
+				ctx.lineTo((w*2/3 - k*w) / scale, (h - k*h) / scale);
+
+				ctx.closePath();
+				ctx.stroke();
+
+				//Ball line
+				ctx.strokeStyle = '#fff';
+				ctx.beginPath();
+				
+				ctx.moveTo((linePos - k*w) / scale, (0 - k*h) / scale);
+				ctx.lineTo(linePos, 0);
+
+				ctx.moveTo((linePos - k*w) / scale, (h - k*h) / scale);
+				ctx.lineTo(linePos, h);
+
+				ctx.moveTo(linePos, 0);
+				ctx.lineTo(linePos, h);
+
+				ctx.moveTo((linePos - k*w) / scale, (0 - k*h) / scale);
+				ctx.lineTo((linePos - k*w) / scale, (h - k*h) / scale);
+
+				ctx.closePath();
+				ctx.stroke();
+
+				ctx.restore();
+
+				ctx.save();
+
+				ctx.strokeStyle = '#0f0';
+				ctx.beginPath();
+				var g = (Math.asin(Math.sin(time / 400)) + Math.PI/2) / Math.PI * 1;
+				var k = 0.12 * g;
+				var s = 1 - 2*k;
+				ctx.translate(k*w*(Math.pow(s, line) - 1)/(s-1), k*h*(Math.pow(s, line) - 1)/(s-1));
+				var scale = Math.pow(s, line);
+				ctx.scale(scale, scale);
+
+				ctx.moveTo(linePos, 0);
+				ctx.lineTo(linePos, h);
+
+				ctx.closePath();
+				ctx.stroke();
+
+				ctx.restore();
+
+				ctx.save();
+
+				ctx.strokeStyle = '#0f0';
+				ctx.beginPath();
+				var g = (Math.asin(Math.sin(time / 400)) + Math.PI/2) / Math.PI * h;
+				var k = 0.12;
+				var s = 1 - 2*k;
+				ctx.translate(k*w*(Math.pow(s, line) - 1)/(s-1), k*h*(Math.pow(s, line) - 1)/(s-1));
+				var scale = Math.pow(s, line);
+				ctx.scale(scale, scale);
+
+				ctx.moveTo((linePos - k*w) / scale, (g - k*h) / scale);
+				ctx.lineTo(linePos, g);
+
+				ctx.closePath();
+				ctx.stroke();
+
+				//Ball
+				// ctx.fillStyle = '#f00';
+				// ctx.beginPath();
+				// ctx.arc(w*3/5, h*4/7, h/21, 0, 2 * Math.PI);
+				// ctx.closePath();
+				// ctx.fill();
+
+				ctx.restore();
+
+				//Front paddle
+				// ctx.fillStyle = 'rgba(200, 200, 200, 0.5)';
+				// ctx.fillRect(paddlePos.x, paddlePos.y, w/10, h/9);
+				// ctx.fillRect(w / 4, h*7/9, w/10, h/9);
+				// ctx.fillRect(w / 4 + w/6, h/8, w/10, h/9);
+
+				ctx.restore();
+
+				requestAnimationFrame(render);
+			});
+		}
+	};
+}]);
