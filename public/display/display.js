@@ -763,4 +763,449 @@ angular.module('app', ['ngMaterial', 'lib'])
 			});
 		}
 	};
+}])
+.directive('testGame5', ['touch', 'size', 'socket', function(touch, size, socket) {
+	return {
+		restrict: 'E',
+		replace: true,
+		template: '<canvas></canvas>',
+		link: function(scope, element, attr) {
+			var canvas = element[0];
+			var w = size;
+			var h = size / 2;
+			canvas.width = w;
+			canvas.height = h;
+			var ctx = canvas.getContext('2d');
+
+			window.fx = 0;
+			window.fy = 0;
+			// var fx = 0, fy = 0;
+
+			element.on('mousemove', function(e) {
+				fx = e.layerX * 2/345 - 1;
+				fy = e.layerY / 173;
+			});
+
+			function update(time) {
+				var tap = touch.getTap();
+				if(tap) {
+					paddlePos.x = tap.x;
+					paddlePos.y = tap.y;
+				}
+			}
+
+			requestAnimationFrame(function render(time) {
+				update(time);
+
+				ctx.save();
+				ctx.clearRect(0, 0, w, h);
+
+				ctx.translate(w / 4, 0);
+				ctx.scale(1/2, 1/2);
+
+				ctx.strokeStyle = '#f00';
+				// ctx.strokeStyle = '#f00';
+				ctx.lineWidth = 10;
+
+				var magic = 1;
+
+				var X = 2, Y = 1, Z = 3;
+
+
+				function point(x, y, z) {
+					return new Point(x, y, z);
+				}
+				function Point(x, y, z) {
+					this.x = x;
+					this.y = y;
+					this.z = z;
+				}
+				Point.prototype = {
+					transform: function() {
+						var k = 0.5/4;
+						var s = 1 - 2*k;
+						var tx = k*w*(Math.pow(s, this.z) - 1)/(s-1);
+						var ty = k*h*(Math.pow(s, this.z) - 1)/(s-1);
+						var scale = Math.pow(s, this.z);
+					
+						var scaleX = scale * w / X;
+						var scaleY = scale * h;
+						var scaleZ = scale;
+
+						var p = new Point(this.x*scaleX + tx + this.z*scaleZ, this.y*scaleY + ty);
+						p.scale = scale;
+						return p;
+						// return new Point(this.x*scaleX + tx + this.z*scaleZ, this.y*scaleY + ty);
+					}
+				};
+
+				[
+					[ point(0, 0, 0), point(0, 0, 3) ],
+					[ point(0, 1, 0), point(0, 1, 3) ],
+
+					[ point(2, 0, 0), point(2, 0, 3) ],
+					[ point(2, 1, 0), point(2, 1, 3) ],
+
+					[ point(0, 0, 0), point(0, 1, 0) ],
+					[ point(2, 0, 0), point(2, 1, 0) ],
+
+					[ point(0, 0, 3), point(0, 1, 3) ],
+					[ point(2, 0, 3), point(2, 1, 3) ],
+
+					[ point(0, 0, 0), point(2, 0, 0) ],
+					[ point(0, 0, 3), point(2, 0, 3) ],
+					[ point(0, 1, 3), point(2, 1, 3) ],
+					[ point(0, 1, 0), point(2, 1, 0) ],
+
+					[ point(0, 0, 1), point(2, 0, 1) ],
+					[ point(0, 1, 1), point(2, 1, 1) ],
+					[ point(0, 0, 1), point(0, 1, 1) ],
+					[ point(2, 0, 1), point(2, 1, 1) ],
+
+					[ point(0, 0, 2), point(2, 0, 2) ],
+					[ point(0, 1, 2), point(2, 1, 2) ],
+					[ point(0, 0, 2), point(0, 1, 2) ],
+					[ point(2, 0, 2), point(2, 1, 2) ],
+				].forEach(function(line) {
+					var p1 = line[0];
+					var p2 = line[1];
+
+					var pp1 = p1.transform();
+					var pp2 = p2.transform();
+
+					ctx.strokeStyle = '#0f0';
+					ctx.beginPath();
+
+					// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
+				
+					ctx.moveTo(pp1.x, pp1.y);
+					ctx.lineTo(pp2.x, pp2.y);
+
+					ctx.closePath();
+					ctx.stroke();
+				});
+
+				// var z = 3;
+				window.z = (Math.asin(Math.sin(time / 400)) + Math.PI/2) / Math.PI * 3;
+				[
+					[ point(0, 0, z), point(2, 0, z) ],
+					[ point(0, 1, z), point(2, 1, z) ],
+					[ point(0, 0, z), point(0, 1, z) ],
+					[ point(2, 0, z), point(2, 1, z) ],
+				].forEach(function(line) {
+					var p1 = line[0];
+					var p2 = line[1];
+
+					var pp1 = p1.transform();
+					var pp2 = p2.transform();
+
+					ctx.strokeStyle = '#fff';
+					ctx.beginPath();
+
+					// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
+				
+					ctx.moveTo(pp1.x, pp1.y);
+					ctx.lineTo(pp2.x, pp2.y);
+					
+					ctx.closePath();
+					ctx.stroke();
+				});
+
+				window.x = 1;
+				// window.x = Math.cos(time / 200) + 1;
+				window.y = 0.5;
+				// window.y = Math.sin(time / 200)*0.5 + 0.5;
+
+				var pw = 1/5;
+				var ph = pw * 2/3;
+
+				// var fx = 0.75;
+				// var fy = 0.35;
+
+
+				[
+					[
+						point(fx - pw/2, fy - ph/2, 3),
+						point(fx + pw/2, fy - ph/2, 3),
+						point(fx + pw/2, fy + ph/2, 3),
+						point(fx - pw/2, fy + ph/2, 3),
+					]
+
+				].forEach(function(points, i) {
+
+					ctx.fillStyle = 'rgba(200, 200, 200, 0.9)';
+					
+					ctx.beginPath();
+					points.forEach(function(p1, i) {
+						var pp1 = p1.transform();
+						if(i == 0) {
+							ctx.moveTo(pp1.x, pp1.y);
+						} else {
+							ctx.lineTo(pp1.x, pp1.y);
+						}
+					});
+					ctx.closePath();
+					ctx.fill();
+
+				});
+
+				[
+					point(x, y, z),
+				].forEach(function(p1) {
+					var pp1 = p1.transform();
+
+					// ctx.fillStyle = '#00f';
+					// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
+
+					ctx.fillStyle = '#f00';
+					ctx.beginPath();
+					ctx.arc(pp1.x, pp1.y, h/21 * pp1.scale, 0, 2 * Math.PI);
+					ctx.closePath();
+					ctx.fill();
+				});
+
+
+				[
+					[
+						point(fx - pw/2, fy - ph/2, 0),
+						point(fx + pw/2, fy - ph/2, 0),
+						point(fx + pw/2, fy + ph/2, 0),
+						point(fx - pw/2, fy + ph/2, 0),
+					]
+
+				].forEach(function(points, i) {
+
+					ctx.fillStyle = 'rgba(200, 200, 200, 0.5)';
+					
+					ctx.beginPath();
+					points.forEach(function(p1, i) {
+						var pp1 = p1.transform();
+						if(i == 0) {
+							ctx.moveTo(pp1.x, pp1.y);
+						} else {
+							ctx.lineTo(pp1.x, pp1.y);
+						}
+					});
+					ctx.closePath();
+					ctx.fill();
+
+				});
+			
+				ctx.restore();
+
+				requestAnimationFrame(render);
+			});
+		}
+	};
+}])
+.directive('testGame6', ['touch', 'size', 'socket', function(touch, size, socket) {
+	return {
+		restrict: 'E',
+		replace: true,
+		template: '<canvas></canvas>',
+		link: function(scope, element, attr) {
+			var canvas = element[0];
+			var w = size;
+			var h = size / 2;
+			canvas.width = w;
+			canvas.height = h;
+			var ctx = canvas.getContext('2d');
+
+			var rotation = {x: 0, y: 0, z: 0};
+
+			var paddlePos = {x: w / 4, y: h*7/9};
+			// var ballPos = {x: 0, y: 0, z: 0};
+		
+			function update(time) {
+				var tap = touch.getTap();
+				if(tap) {
+					paddlePos.x = tap.x;
+					paddlePos.y = tap.y;
+				}
+			}
+
+			requestAnimationFrame(function render(time) {
+				update(time);
+
+				ctx.save();
+				ctx.clearRect(0, 0, w, h);
+
+				ctx.translate(w / 4, 0);
+				ctx.scale(1/2, 1/2);
+
+				// ctx.strokeStyle = '#f00';
+				ctx.lineWidth = 10;
+
+				var magic = 1;
+
+				var X = 2, Y = 1, Z = 3;
+
+
+				function point(x, y, z) {
+					return new Point(x, y, z);
+				}
+				function Point(x, y, z) {
+					this.x = x;
+					this.y = y;
+					this.z = z;
+				}
+				Point.prototype = {
+					transform: function() {
+						var k = 0.24 * this.x / X;
+						var s = 1 - 2*k;
+
+						var tx = this.x == 0 ? 0 : k*w*(Math.pow(s, magic) - 1)/(s-1);
+						var ty = this.x == 0 ? 0 : k*h*(Math.pow(s, magic) - 1)/(s-1);
+					
+						var scale = Math.pow(s, magic);
+						var scaleX = scale;
+						var scaleY = scale * h;
+						var scaleZ = scale * w / Z;
+
+						var p = new Point(this.x*scaleX + tx + this.z*scaleZ, this.y*scaleY + ty);
+						p.scale = scale;
+						return p;
+						// return new Point(this.x*scaleX + tx + this.z*scaleZ, this.y*scaleY + ty);
+					}
+				};
+
+				[
+					[ point(0, 0, 0), point(0, 0, 3) ],
+					[ point(0, 1, 0), point(0, 1, 3) ],
+
+					[ point(2, 0, 0), point(2, 0, 3) ],
+					[ point(2, 1, 0), point(2, 1, 3) ],
+
+					[ point(0, 0, 0), point(0, 1, 0) ],
+					[ point(2, 0, 0), point(2, 1, 0) ],
+
+					[ point(0, 0, 3), point(0, 1, 3) ],
+					[ point(2, 0, 3), point(2, 1, 3) ],
+
+					[ point(0, 0, 0), point(2, 0, 0) ],
+					[ point(0, 0, 3), point(2, 0, 3) ],
+					[ point(0, 1, 3), point(2, 1, 3) ],
+					[ point(0, 1, 0), point(2, 1, 0) ],
+
+					[ point(0, 0, 1), point(2, 0, 1) ],
+					[ point(0, 1, 1), point(2, 1, 1) ],
+					[ point(0, 0, 1), point(0, 1, 1) ],
+					[ point(2, 0, 1), point(2, 1, 1) ],
+
+					[ point(0, 0, 2), point(2, 0, 2) ],
+					[ point(0, 1, 2), point(2, 1, 2) ],
+					[ point(0, 0, 2), point(0, 1, 2) ],
+					[ point(2, 0, 2), point(2, 1, 2) ],
+				].forEach(function(line) {
+					var p1 = line[0];
+					var p2 = line[1];
+
+					var pp1 = p1.transform();
+					var pp2 = p2.transform();
+
+					ctx.strokeStyle = '#0f0';
+					ctx.beginPath();
+
+					// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
+				
+					ctx.moveTo(pp1.x, pp1.y);
+					ctx.lineTo(pp2.x, pp2.y);
+
+					ctx.closePath();
+					ctx.stroke();
+				});
+
+				// var z = 3;
+				// var z = (Math.asin(Math.sin(time / 400)) + Math.PI/2) / Math.PI * 3;
+				[
+					[ point(0, 0, z), point(2, 0, z) ],
+					[ point(0, 1, z), point(2, 1, z) ],
+					[ point(0, 0, z), point(0, 1, z) ],
+					[ point(2, 0, z), point(2, 1, z) ],
+				].forEach(function(line) {
+					var p1 = line[0];
+					var p2 = line[1];
+
+					var pp1 = p1.transform();
+					var pp2 = p2.transform();
+
+					ctx.strokeStyle = '#fff';
+					ctx.beginPath();
+
+					// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
+				
+					ctx.moveTo(pp1.x, pp1.y);
+					ctx.lineTo(pp2.x, pp2.y);
+
+					ctx.closePath();
+					ctx.stroke();
+				});
+
+				// // var x = 1.75;
+				// var x = Math.cos(time / 200) + 1;
+				// var y = 0;
+				// var y = Math.sin(time / 200)*0.5 + 0.5;
+				[
+					point(x, y, z),
+				].forEach(function(p1) {
+					var pp1 = p1.transform();
+
+					// ctx.fillStyle = '#00f';
+					// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
+
+					ctx.fillStyle = '#f00';
+					ctx.beginPath();
+					ctx.arc(pp1.x, pp1.y, h/21 * pp1.scale, 0, 2 * Math.PI);
+					ctx.closePath();
+					ctx.fill();
+				});
+
+				var pw = 1/5;
+				var ph = pw * 2/3;
+
+				// var fx = 0.75;
+				// var fy = 0.35;
+				[
+					[
+						point(fx - pw/2, fy - ph/2, 0),
+						point(fx + pw/2, fy - ph/2, 0),
+						point(fx + pw/2, fy + ph/2, 0),
+						point(fx - pw/2, fy + ph/2, 0),
+					],
+					[
+						point(fx - pw/2, fy - ph/2, 3),
+						point(fx + pw/2, fy - ph/2, 3),
+						point(fx + pw/2, fy + ph/2, 3),
+						point(fx - pw/2, fy + ph/2, 3),
+					]
+
+				].forEach(function(points, i) {
+
+					if(i == 0) {
+						ctx.fillStyle = 'rgba(200, 200, 200, 0.8)';
+					}
+					if(i == 1) {
+						ctx.fillStyle = 'rgba(200, 200, 200, 0.8)';
+					}
+					ctx.beginPath();
+					points.forEach(function(p1, i) {
+						var pp1 = p1.transform();
+						if(i == 0) {
+							ctx.moveTo(pp1.x, pp1.y);
+						} else {
+							ctx.lineTo(pp1.x, pp1.y);
+						}
+					});
+					ctx.closePath();
+					ctx.fill();
+
+				});
+
+
+				ctx.restore();
+
+				requestAnimationFrame(render);
+			});
+		}
+	};
 }]);
