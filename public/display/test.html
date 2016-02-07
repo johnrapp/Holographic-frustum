@@ -37,7 +37,7 @@ var h = 500;
 
 // var n = 0;
 var n = 1;
-var f = 100;
+var f = 1000;
 
 ctx.translate(0, h);
 ctx.scale(1, -1);
@@ -47,7 +47,6 @@ ctx.translate(w/2, h/2);
 // var p = point(10, 0, 0);
 
 var ps = [
-
 	point(-1, -1/2, -1.5),
 	point(1, -1/2, -1.5),
 	point(1, 1/2, -1.5),
@@ -69,44 +68,65 @@ var ps = [
 	point(-1, 1/2, 1.5),
 ];
 
-var camera = mat4.create();
-mat4.frustum(camera, -w/2, w/2, -h/2, h/2, n, f);
+// var camera = mat4.create();
+// mat4.frustum(camera, -w/2, w/2, -h/2, h/2, n, f);
 // mat4.frustum(camera, -w/2, w/2, -h/2, h/2, 1, w/2);
 // var view = mat4.create();
-mat4.scale(camera, camera, vec4.fromValues(w*w / 4, h*h / 4, 1, 1));
+// mat4.scale(camera, camera, vec4.fromValues(w*w / 4, h*h / 4, 1, 1));
 
-mat4.translate(camera, camera, vec4.fromValues(0, 0, 1, 0));
+// mat4.translate(camera, camera, vec4.fromValues(0, 0, 1, 0));
 
 // mat4.translate(camera, camera, vec4.fromValues(0, 0, 1.5, 0));
 
+var first = true;
 requestAnimationFrame(function update(time) {
 
 	ctx.clearRect(-w/2, -h/2, w, h);
 
 	var camera = mat4.create();
 	mat4.frustum(camera, -w/2, w/2, -h/2, h/2, n, f);
-	mat4.scale(camera, camera, vec4.fromValues(w*w / 4, h*h / 4, 1, 1));
+	mat4.scale(camera, camera, vec4.fromValues(w*w / 4, h*h / 4, -1, 1));
+	mat4.translate(camera, camera, vec4.fromValues(0, 0, 1, 0));
 
 	var i = (Math.asin(Math.sin(time / 800)) + Math.PI/2) / Math.PI;
 	i = i*i*i*i*(35 + i*(-84 + i*(70 - i*20)));
 
-	// mat4.translate(camera, camera, vec4.fromValues(0, 0, 2.5, 0));
-	mat4.translate(camera, camera, vec4.fromValues(0, 0, i*2.5, 0));
+	var ii = (Math.asin(Math.sin(time / 800 * 2)) + Math.PI/2) / Math.PI;
+	ii = ii*ii*ii*ii*(35 + ii*(-84 + ii*(70 - ii*20)));
+
+	var iii = (Math.asin(Math.sin(time / 800 * 4)) + Math.PI/2) / Math.PI;
+	iii = iii*iii*iii*iii*(35 + iii*(-84 + iii*(70 - iii*20)));
+
+
+	// mat4.translate(camera, camera, vec4.fromValues(0, 0, 1.5, 0));
+	mat4.translate(camera, camera, vec4.fromValues(0, 0, i*1.5, 0));
 
 	// ctx.fillRect(p[0] - 3, p[1] - 3, 6, 6);
 	//mat4.translate(camera, camera, vec4.fromValues(0, 0, 1.5, 0));
 
 	var a = time / 500;
 
-	var transformation = mat4.create();
-	mat4.translate(transformation, transformation, vec4.fromValues(0, 0, (1 - i)*2.5, 0));
-	// mat4.translate(transformation, transformation, vec4.fromValues(0, 0, 2.5, 0));
-	// mat4.rotateY(transformation, transformation, Math.PI / 2);
-	mat4.rotateY(transformation, transformation, i * Math.PI / 2);
-	// mat4.rotateY(transformation, transformation, a);
-	// mat4.scale(transformation, transformation, vec4.fromValues(1, 1, 1, 1));
-	// mat4.translate(transformation, transformation, vec4.fromValues(0, 0, 20, 0));
-	// mat4.translate(transformation, transformation, vec4.fromValues(0, 0, w, 0));
+	var tunnelMatrix = mat4.create();
+	// mat4.translate(tunnelMatrix, tunnelMatrix, vec4.fromValues(0, 0, (1 - i)*1.5, 0));
+	mat4.translate(tunnelMatrix, tunnelMatrix, vec4.fromValues(0, 0, 1.5, 0));
+	// mat4.rotateY(tunnelMatrix, tunnelMatrix, Math.PI / 2);
+	// mat4.rotateY(tunnelMatrix, tunnelMatrix, i * Math.PI / 2);
+	// mat4.rotateY(tunnelMatrix, tunnelMatrix, a);
+	// mat4.scale(tunnelMatrix, tunnelMatrix, vec4.fromValues(1, 1, 1, 1));
+	// mat4.translate(tunnelMatrix, tunnelMatrix, vec4.fromValues(0, 0, 20, 0));
+	// mat4.translate(tunnelMatrix, tunnelMatrix, vec4.fromValues(0, 0, w, 0));
+
+	var world = mat4.create();
+	mat4.rotateY(world, world, i * Math.PI / 2);
+	mat4.translate(world, world, vec4.fromValues(0, 0, -1.5 * i, 0));
+
+	function transform(p) {
+		var pp = vec4.create();
+		vec3.transformMat4(pp, p, tunnelMatrix);
+		vec3.transformMat4(pp, pp, world);
+		vec3.transformMat4(pp, pp, camera);
+		return pp;
+	}
 
 	var s1 = ps.slice(0, 4);
 	var s2 = ps.slice(4, 8);
@@ -127,11 +147,10 @@ requestAnimationFrame(function update(time) {
 			// p = point(p[0], p[1], p[2] + w/2*2);
 			// p = point(p[0]*cos(a) - p[1]*sin(a), p[0]*sin(a) + p[1]*cos(a), p[2]);
 			// var pp = point(p[0] * n / (n + p[2]), p[1] * n / (n + p[2]));
-			var pp = vec4.create();
-			vec3.transformMat4(pp, p, transformation);
-			vec3.transformMat4(pp, pp, camera);
+			var pp = transform(p);
+			// if(first) console.log(p[2])
 			// console.log(pp[2])
-			// ctx.lineWidth = 5 * (p[2] - n) / (f - n);
+			// ctx.lineWidth = 5 * ((pp[2] - 1.5) / 1.5 + 0.5)/1.5;
 			if(j == 0) {
 				ctx.moveTo(pp[0], pp[1]);
 			} else {
@@ -145,14 +164,10 @@ requestAnimationFrame(function update(time) {
 			ctx.beginPath();
 			slice.forEach(function(p, j) {
 				// var pp = point(p[0] * n / (n + p[2]), p[1] * n / (n + p[2]));
-				var pp = vec4.create();
-				vec3.transformMat4(pp, p, transformation);
-				vec3.transformMat4(pp, pp, camera);
+				var pp = transform(p);
 				ctx.moveTo(pp[0], pp[1]);
 				var P = slices[i - 1][j];
-				var PP = vec4.create();
-				vec3.transformMat4(PP, P, transformation);
-				vec3.transformMat4(PP, PP, camera);
+				var PP = transform(P);
 				ctx.lineTo(PP[0], PP[1]);
 				// ctx.moveTo(pp[0], pp[1]);
 			});
@@ -161,6 +176,48 @@ requestAnimationFrame(function update(time) {
 			ctx.stroke();
 		}
 	});
+
+	ctx.beginPath();
+	var square = [
+		point(-0.1 + 0.2, -0.1 + 0.3, iii*3),
+		point(0.1 + 0.2, -0.1 + 0.3, iii*3),
+		point(0.1 + 0.2, 0.1 + 0.3, iii*3),
+		point(-0.1 + 0.2, 0.1 + 0.3, iii*3),
+	]
+	.forEach(function(p, i) {
+		var pp = vec4.create();
+		vec3.transformMat4(pp, p, world);
+		vec3.transformMat4(pp, pp, camera);
+		if(i == 0) {
+			ctx.moveTo(pp[0], pp[1]);
+		} else {
+			ctx.lineTo(pp[0], pp[1]);
+		}
+	});
+
+	ctx.closePath();
+	ctx.fillStyle = '#f00';
+	ctx.fill();
+
+
+	ctx.beginPath();
+	for(var v = 0; v <= Math.PI * 2; v += Math.PI * 2 / 16) {
+		var b = point(Math.cos(v) * 0.1 - 0.3, Math.sin(v) * 0.1 - 0.1, iii*3);
+		var bp = vec4.create();
+		vec3.transformMat4(bp, b, world);
+		vec3.transformMat4(bp, bp, camera);
+		if(first) console.log(v)
+		if(v == 0) {
+			ctx.moveTo(bp[0], bp[1]);
+		} else {
+			ctx.lineTo(bp[0], bp[1]);
+		}
+	}
+	ctx.closePath();
+	ctx.fillStyle = '#f00';
+	ctx.fill();
+
+	first = false;
 
 	requestAnimationFrame(update);
 });
