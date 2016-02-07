@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+
+	<style type="text/css">
+
+	canvas {
+		border: 1px solid black;
+	}
+
+	body {
+		background: black;
+	}
+
+	</style>
+
+	<script src="../lib/matrix.js"></script>
+	<script type="text/javascript">
+	function point(x, y, z) {
+		return vec4.fromValues(x, y, z, 1);
+	}
+
+	</script>
+</head>
+<body>
+
+<canvas width="500" height="500"></canvas>
+
+<script type="text/javascript">
+	
+var canvas = document.querySelector('canvas');
+var ctx = canvas.getContext('2d');
+
+var w = 500;
+var h = 500;
+
+// var n = 0;
+var n = 1;
+var f = 100;
+
+ctx.translate(0, h);
+ctx.scale(1, -1);
+ctx.translate(w/2, h/2);
+
+
+// var p = point(10, 0, 0);
+
+var ps = [
+
+	point(-1, -1/2, -1.5),
+	point(1, -1/2, -1.5),
+	point(1, 1/2, -1.5),
+	point(-1, 1/2, -1.5),
+
+	point(-1, -1/2, -0.5),
+	point(1, -1/2, -0.5),
+	point(1, 1/2, -0.5),
+	point(-1, 1/2, -0.5),
+
+	point(-1, -1/2, 0.5),
+	point(1, -1/2, 0.5),
+	point(1, 1/2, 0.5),
+	point(-1, 1/2, 0.5),
+
+	point(-1, -1/2, 1.5),
+	point(1, -1/2, 1.5),
+	point(1, 1/2, 1.5),
+	point(-1, 1/2, 1.5),
+];
+
+var camera = mat4.create();
+mat4.frustum(camera, -w/2, w/2, -h/2, h/2, n, f);
+// mat4.frustum(camera, -w/2, w/2, -h/2, h/2, 1, w/2);
+// var view = mat4.create();
+mat4.scale(camera, camera, vec4.fromValues(w*w / 4, h*h / 4, 1, 1));
+
+mat4.translate(camera, camera, vec4.fromValues(0, 0, 1, 0));
+
+// mat4.translate(camera, camera, vec4.fromValues(0, 0, 1.5, 0));
+
+requestAnimationFrame(function update(time) {
+
+	ctx.clearRect(-w/2, -h/2, w, h);
+
+	var camera = mat4.create();
+	mat4.frustum(camera, -w/2, w/2, -h/2, h/2, n, f);
+	mat4.scale(camera, camera, vec4.fromValues(w*w / 4, h*h / 4, 1, 1));
+
+	var i = (Math.asin(Math.sin(time / 800)) + Math.PI/2) / Math.PI;
+	i = i*i*i*i*(35 + i*(-84 + i*(70 - i*20)));
+
+	// mat4.translate(camera, camera, vec4.fromValues(0, 0, 2.5, 0));
+	mat4.translate(camera, camera, vec4.fromValues(0, 0, i*2.5, 0));
+
+	// ctx.fillRect(p[0] - 3, p[1] - 3, 6, 6);
+	//mat4.translate(camera, camera, vec4.fromValues(0, 0, 1.5, 0));
+
+	var a = time / 500;
+
+	var transformation = mat4.create();
+	mat4.translate(transformation, transformation, vec4.fromValues(0, 0, (1 - i)*2.5, 0));
+	// mat4.translate(transformation, transformation, vec4.fromValues(0, 0, 2.5, 0));
+	// mat4.rotateY(transformation, transformation, Math.PI / 2);
+	mat4.rotateY(transformation, transformation, i * Math.PI / 2);
+	// mat4.rotateY(transformation, transformation, a);
+	// mat4.scale(transformation, transformation, vec4.fromValues(1, 1, 1, 1));
+	// mat4.translate(transformation, transformation, vec4.fromValues(0, 0, 20, 0));
+	// mat4.translate(transformation, transformation, vec4.fromValues(0, 0, w, 0));
+
+	var s1 = ps.slice(0, 4);
+	var s2 = ps.slice(4, 8);
+	var s3 = ps.slice(8, 12);
+	var s4 = ps.slice(12, 16);
+
+	var slices = [s1, s2, s3, s4];
+
+	ctx.strokeStyle = '#0f0';
+	ctx.lineWidth = 5;
+
+	slices.forEach(function(slice, i, slices) {
+		ctx.beginPath();
+		slice.forEach(function(p, j) {
+			// p = point(p[0], p[1], p[2]*2);
+			// p = point(p[0], p[1], p[2] - w/4);
+			// p = point(p[0], p[1]*cos(a) - p[2]*sin(a), p[1]*sin(a) + p[2]*cos(a));
+			// p = point(p[0], p[1], p[2] + w/2*2);
+			// p = point(p[0]*cos(a) - p[1]*sin(a), p[0]*sin(a) + p[1]*cos(a), p[2]);
+			// var pp = point(p[0] * n / (n + p[2]), p[1] * n / (n + p[2]));
+			var pp = vec4.create();
+			vec3.transformMat4(pp, p, transformation);
+			vec3.transformMat4(pp, pp, camera);
+			// console.log(pp[2])
+			// ctx.lineWidth = 5 * (p[2] - n) / (f - n);
+			if(j == 0) {
+				ctx.moveTo(pp[0], pp[1]);
+			} else {
+				ctx.lineTo(pp[0], pp[1]);
+			}
+		});
+		ctx.closePath();
+		ctx.stroke();
+
+		if(i != 0) {
+			ctx.beginPath();
+			slice.forEach(function(p, j) {
+				// var pp = point(p[0] * n / (n + p[2]), p[1] * n / (n + p[2]));
+				var pp = vec4.create();
+				vec3.transformMat4(pp, p, transformation);
+				vec3.transformMat4(pp, pp, camera);
+				ctx.moveTo(pp[0], pp[1]);
+				var P = slices[i - 1][j];
+				var PP = vec4.create();
+				vec3.transformMat4(PP, P, transformation);
+				vec3.transformMat4(PP, PP, camera);
+				ctx.lineTo(PP[0], PP[1]);
+				// ctx.moveTo(pp[0], pp[1]);
+			});
+
+			ctx.closePath();
+			ctx.stroke();
+		}
+	});
+
+	requestAnimationFrame(update);
+});
+
+</script>
+
+</body>
+</html>
