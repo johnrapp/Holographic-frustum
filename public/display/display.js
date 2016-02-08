@@ -1166,4 +1166,379 @@ angular.module('app', ['ngMaterial', 'lib'])
 			});
 		}
 	};
+}])
+.directive('testGameNew', ['touch', 'size', 'socket', function(touch, size, socket) {
+	return {
+		restrict: 'E',
+		replace: true,
+		template: '<canvas></canvas>',
+		link: function(scope, element, attr) {
+			var canvas = element[0];
+			var w = size;
+			var h = size / 2;
+			canvas.width = w;
+			canvas.height = h;
+			var ctx = canvas.getContext('2d');
+
+			function point(x, y, z) {
+				return vec4.fromValues(x, y, z, 1);
+			}
+
+			// var n = 0;
+			var n = 1;
+			var f = 1000;
+
+
+			// var p = point(10, 0, 0);
+
+			var ps = [
+				point(-1, -1/2, -1.5),
+				point(1, -1/2, -1.5),
+				point(1, 1/2, -1.5),
+				point(-1, 1/2, -1.5),
+
+				point(-1, -1/2, -0.5),
+				point(1, -1/2, -0.5),
+				point(1, 1/2, -0.5),
+				point(-1, 1/2, -0.5),
+
+				point(-1, -1/2, 0.5),
+				point(1, -1/2, 0.5),
+				point(1, 1/2, 0.5),
+				point(-1, 1/2, 0.5),
+
+				point(-1, -1/2, 1.5),
+				point(1, -1/2, 1.5),
+				point(1, 1/2, 1.5),
+				point(-1, 1/2, 1.5),
+			];
+
+			// var camera = mat4.create();
+			// mat4.frustum(camera, -w/2, w/2, -h/2, h/2, n, f);
+			// mat4.frustum(camera, -w/2, w/2, -h/2, h/2, 1, w/2);
+			// var view = mat4.create();
+			// mat4.scale(camera, camera, vec4.fromValues(w*w / 4, h*h / 4, 1, 1));
+
+			// mat4.translate(camera, camera, vec4.fromValues(0, 0, 1, 0));
+
+			// mat4.translate(camera, camera, vec4.fromValues(0, 0, 1.5, 0));
+
+			// var paddlePos = {x: 0.2, y: 0.3};
+
+			var paddlePos = point(fx - 1, fy - 0.5, 0.2);
+			var ballPos = point(-0.3, -0.1, 0);
+			var ballVel = point(0, 0, 1.5);
+
+			function update(time) {
+			// 	var tap = touch.getTap();
+			// 	if(tap) {
+			// 		paddlePos.x = (tap.x - w/2) / (w/2) * 2;
+			// 		paddlePos.y = (tap.y - h/2) / (h/2) * 1;
+			// 	}
+			}
+
+			var fx = 0;
+			var fy = 0;
+			// var fx = 0, fy = 0;
+
+			element.on('mousemove', function(e) {
+				fx = e.layerX * 2/345 - 1;
+				fy = e.layerY / 173;
+			});
+
+			var first = true;
+
+			// var lastTime = null;
+			var lastTime = 0;
+			requestAnimationFrame(function tick(time) {
+
+				update(time);
+
+				// if(!lastTime) lastTime = time;
+
+				// var dt = (time - lastTime) / 1400;
+				var dt = (time - lastTime) / 1000;
+
+				ctx.clearRect(0, 0, w, h);
+				// ctx.clearRect(-w/2, -h/2, w, h);
+
+				ctx.save();
+
+				ctx.translate(0, h);
+				ctx.scale(1, -1);
+				ctx.translate(w/2, h/2);
+				ctx.translate(0, h/4);
+
+				var camera = mat4.create();
+				mat4.frustum(camera, -w/2, w/2, -h/4, h/4, n, f);
+				mat4.scale(camera, camera, vec4.fromValues((w / 2)*(w / 4), (h / 2)*(h / 4), -1, 1));
+				mat4.translate(camera, camera, vec4.fromValues(0, 0, n, 0));
+
+				var i = (Math.asin(Math.sin(time / 800)) + Math.PI/2) / Math.PI;
+				i = i*i*i*i*(35 + i*(-84 + i*(70 - i*20)));
+
+				var ii = (Math.asin(Math.sin(time / 800 * 2)) + Math.PI/2) / Math.PI;
+				ii = ii*ii*ii*ii*(35 + ii*(-84 + ii*(70 - ii*20)));
+
+				var iii = (Math.asin(Math.sin(time / 800 * 2)) + Math.PI/2) / Math.PI;
+				// iii = iii*iii*iii*iii*(35 + iii*(-84 + iii*(70 - iii*20)));
+
+
+				mat4.translate(camera, camera, vec4.fromValues(0, 0, i*1.5, 0));
+				// mat4.translate(camera, camera, vec4.fromValues(0, 0, 1.5, 0));
+
+				var a = time / 500;
+
+				var tunnelMatrix = mat4.create();
+				mat4.translate(tunnelMatrix, tunnelMatrix, vec4.fromValues(0, 0, 1.5, 0));
+				// mat4.rotateY(tunnelMatrix, tunnelMatrix, a);
+				// mat4.scale(tunnelMatrix, tunnelMatrix, vec4.fromValues(1, 1, 1, 1));
+
+				var world = mat4.create();
+				// mat4.scale(world, world, vec4.fromValues(1, 1, 1/2, 1));
+				mat4.rotateY(world, world, i * Math.PI / 2);
+				mat4.translate(world, world, vec4.fromValues(0, 0, -1.5 * i, 0));
+				// mat4.rotateY(world, world, Math.PI / 2);
+				// mat4.translate(world, world, vec4.fromValues(0, 0, -1.5, 0));
+
+
+				var lastPaddlePos = paddlePos;
+				paddlePos = point(fx - 1, fy - 0.5, 0);
+				// ballPos = point(ballPos[0], ballPos[1], iii * 3);
+				// ballPos = point(ballPos[0], ballPos[1], iii * 3);
+				var ball = mat4.create();
+				mat4.translate(ball, ball, vec4.fromValues(ballVel[0] * dt, ballVel[1] * dt, ballVel[2] * dt, 0));
+				vec3.transformMat4(ballPos, ballPos, ball);
+
+				var paddleVel = vec4.create();
+				vec4.subtract(paddleVel, paddlePos, lastPaddlePos);
+
+				if(ballPos[2] >= 3) {
+					ballPos = point(ballPos[0], ballPos[1], 3);
+
+					ballVel = point(paddleVel[0] * 4, -paddleVel[1] * 4, -ballVel[2]);
+					// ballVel = point(paddleVel[0], paddleVel[1], -ballVel[2]);
+				}
+				if(ballPos[2] <= 0) {
+					ballPos = point(ballPos[0], ballPos[1], 0);
+					// ballVel = point(0, 0, -ballVel[2]);
+					ballVel = point(paddleVel[0] * 4, -paddleVel[1] * 4, -ballVel[2]);
+					// vec4.normalize(ballVel, ballVel);
+				}
+				if(ballPos[1] >= 0.5) {
+					ballPos = point(ballPos[0], 0.5, ballPos[2]);
+					ballVel = point(ballVel[0], -ballVel[1], ballVel[2]);
+				}
+				if(ballPos[1] <= -0.5) {
+					ballPos = point(ballPos[0], -0.5, ballPos[2]);
+					ballVel = point(ballVel[0], -ballVel[1], ballVel[2]);
+				}
+
+				if(ballPos[0] >= 1) {
+					ballPos = point(1, ballPos[1], ballPos[2]);
+					ballVel = point(-ballVel[0], ballVel[1], ballVel[2]);
+				}
+				if(ballPos[0] <= -1) {
+					ballPos = point(-1, ballPos[1], ballPos[2]);
+					ballVel = point(-ballVel[0], ballVel[1], ballVel[2]);
+				}
+
+				function transform(p) {
+					var pp = vec4.create();
+					vec3.transformMat4(pp, p, tunnelMatrix);
+					vec3.transformMat4(pp, pp, world);
+					vec3.transformMat4(pp, pp, camera);
+					return pp;
+				}
+
+				var s1 = ps.slice(0, 4);
+				var s2 = ps.slice(4, 8);
+				var s3 = ps.slice(8, 12);
+				var s4 = ps.slice(12, 16);
+
+				var slices = [s1, s2, s3, s4];
+
+				ctx.strokeStyle = '#0f0';
+				ctx.lineWidth = 5;
+
+				slices.forEach(function(slice, i, slices) {
+					ctx.beginPath();
+					slice.forEach(function(p, j) {
+						var pp = transform(p);
+						// ctx.lineWidth = 5 * ((pp[2] - 1.5) / 1.5 + 0.5)/1.5;
+						if(j == 0) {
+							ctx.moveTo(pp[0], pp[1]);
+						} else {
+							ctx.lineTo(pp[0], pp[1]);
+						}
+					});
+					ctx.closePath();
+					ctx.stroke();
+
+					if(i != 0) {
+						ctx.beginPath();
+						slice.forEach(function(p, j) {
+							var pp = transform(p);
+							ctx.moveTo(pp[0], pp[1]);
+							var P = slices[i - 1][j];
+							var PP = transform(P);
+							ctx.lineTo(PP[0], PP[1]);
+						});
+
+						ctx.closePath();
+						ctx.stroke();
+					}
+				});
+
+				var pw = 0.15;
+				var ph = pw * 2/3;
+				ctx.beginPath();
+				[
+					point(-pw + ballPos[0], -ph + ballPos[1], 3),
+					point(pw + ballPos[0], -ph + ballPos[1], 3),
+					point(pw + ballPos[0], ph + ballPos[1], 3),
+					point(-pw + ballPos[0], ph + ballPos[1], 3),
+				]
+				.forEach(function(p, i) {
+					var pp = vec4.create();
+					vec3.transformMat4(pp, p, world);
+					vec3.transformMat4(pp, pp, camera);
+					if(i == 0) {
+						ctx.moveTo(pp[0], pp[1]);
+					} else {
+						ctx.lineTo(pp[0], pp[1]);
+					}
+				});
+				ctx.closePath();
+				ctx.fillStyle = 'rgba(200, 200, 200, 0.8)';
+				ctx.fill();
+
+				var br = 0.1;
+
+				[
+					[
+						point(ballPos[0], ballPos[1], ballPos[2] + br),
+						point(ballPos[0] + br, ballPos[1], ballPos[2]),
+						point(ballPos[0], ballPos[1] + br, ballPos[2]),
+					],
+					[
+						point(ballPos[0], ballPos[1], ballPos[2] + br),
+						point(ballPos[0] - br, ballPos[1], ballPos[2]),
+						point(ballPos[0], ballPos[1] + br, ballPos[2]),
+					],
+					[
+						point(ballPos[0], ballPos[1], ballPos[2] + br),
+						point(ballPos[0] + br, ballPos[1], ballPos[2]),
+						point(ballPos[0], ballPos[1] - br, ballPos[2]),
+					],
+					[
+						point(ballPos[0], ballPos[1], ballPos[2] + br),
+						point(ballPos[0] - br, ballPos[1], ballPos[2]),
+						point(ballPos[0], ballPos[1] - br, ballPos[2]),
+					],
+
+					[
+						point(ballPos[0], ballPos[1], ballPos[2] - br),
+						point(ballPos[0] + br, ballPos[1], ballPos[2]),
+						point(ballPos[0], ballPos[1] + br, ballPos[2]),
+					],
+					[
+						point(ballPos[0], ballPos[1], ballPos[2] - br),
+						point(ballPos[0] - br, ballPos[1], ballPos[2]),
+						point(ballPos[0], ballPos[1] + br, ballPos[2]),
+					],
+					[
+						point(ballPos[0], ballPos[1], ballPos[2] - br),
+						point(ballPos[0] + br, ballPos[1], ballPos[2]),
+						point(ballPos[0], ballPos[1] - br, ballPos[2]),
+					],
+					[
+						point(ballPos[0], ballPos[1], ballPos[2] - br),
+						point(ballPos[0] - br, ballPos[1], ballPos[2]),
+						point(ballPos[0], ballPos[1] - br, ballPos[2]),
+					],
+				]
+				.forEach(function(face) {
+					ctx.beginPath();
+					face.forEach(function(p, i) {
+						var pp = vec4.create();
+						vec3.transformMat4(pp, p, world);
+						vec3.transformMat4(pp, pp, camera);
+						if(i == 0) {
+							ctx.moveTo(pp[0], pp[1]);
+						} else {
+							ctx.lineTo(pp[0], pp[1]);
+						}
+					});
+					ctx.closePath();
+					ctx.fillStyle = '#f00';
+					ctx.fill();
+				});
+
+				ctx.beginPath();
+				for(var v = 0; v <= Math.PI * 2; v += Math.PI * 2 / 16) {
+					var b = point(Math.cos(v) * 0.1 + ballPos[0], Math.sin(v) * 0.1 + ballPos[1], ballPos[2]);
+					var bp = vec4.create();
+					vec3.transformMat4(bp, b, world);
+					vec3.transformMat4(bp, bp, camera);
+					// if(first) console.log(v)
+					if(v == 0) {
+						ctx.moveTo(bp[0], bp[1]);
+					} else {
+						ctx.lineTo(bp[0], bp[1]);
+					}
+				}
+				ctx.closePath();
+				ctx.fillStyle = '#f00';
+				ctx.fill();
+
+				ctx.beginPath();
+				for(var v = 0; v <= Math.PI * 2; v += Math.PI * 2 / 16) {
+					var b = point(ballPos[0], Math.sin(v) * 0.1 + ballPos[1], Math.cos(v) * 0.1 + ballPos[2]);
+					var bp = vec4.create();
+					vec3.transformMat4(bp, b, world);
+					vec3.transformMat4(bp, bp, camera);
+					// if(first) console.log(v)
+					if(v == 0) {
+						ctx.moveTo(bp[0], bp[1]);
+					} else {
+						ctx.lineTo(bp[0], bp[1]);
+					}
+				}
+				ctx.closePath();
+				ctx.fillStyle = '#f00';
+				ctx.fill();
+
+				ctx.beginPath();
+				[
+					point(-pw + paddlePos[0], -ph - paddlePos[1], paddlePos[2]),
+					point(pw + paddlePos[0], -ph - paddlePos[1], paddlePos[2]),
+					point(pw + paddlePos[0], ph - paddlePos[1], paddlePos[2]),
+					point(-pw + paddlePos[0], ph - paddlePos[1], paddlePos[2]),
+				]
+				.forEach(function(p, i) {
+					var pp = vec4.create();
+					vec3.transformMat4(pp, p, world);
+					vec3.transformMat4(pp, pp, camera);
+					if(i == 0) {
+						ctx.moveTo(pp[0], pp[1]);
+					} else {
+						ctx.lineTo(pp[0], pp[1]);
+					}
+				});
+
+				ctx.closePath();
+				ctx.fillStyle = 'rgba(200, 200, 200, 0.5)';
+				ctx.fill();
+
+				ctx.restore();
+
+				lastTime = time;
+
+				first = false;
+
+				requestAnimationFrame(tick);
+			});
+		}
+	};
 }]);

@@ -98,27 +98,18 @@ requestAnimationFrame(function update(time) {
 	iii = iii*iii*iii*iii*(35 + iii*(-84 + iii*(70 - iii*20)));
 
 
-	// mat4.translate(camera, camera, vec4.fromValues(0, 0, 1.5, 0));
-	mat4.translate(camera, camera, vec4.fromValues(0, 0, i*1.5, 0));
-
-	// ctx.fillRect(p[0] - 3, p[1] - 3, 6, 6);
-	//mat4.translate(camera, camera, vec4.fromValues(0, 0, 1.5, 0));
+	// mat4.translate(camera, camera, vec4.fromValues(0, 0, i*1.5, 0));
 
 	var a = time / 500;
 
 	var tunnelMatrix = mat4.create();
-	// mat4.translate(tunnelMatrix, tunnelMatrix, vec4.fromValues(0, 0, (1 - i)*1.5, 0));
 	mat4.translate(tunnelMatrix, tunnelMatrix, vec4.fromValues(0, 0, 1.5, 0));
-	// mat4.rotateY(tunnelMatrix, tunnelMatrix, Math.PI / 2);
-	// mat4.rotateY(tunnelMatrix, tunnelMatrix, i * Math.PI / 2);
 	// mat4.rotateY(tunnelMatrix, tunnelMatrix, a);
 	// mat4.scale(tunnelMatrix, tunnelMatrix, vec4.fromValues(1, 1, 1, 1));
-	// mat4.translate(tunnelMatrix, tunnelMatrix, vec4.fromValues(0, 0, 20, 0));
-	// mat4.translate(tunnelMatrix, tunnelMatrix, vec4.fromValues(0, 0, w, 0));
 
 	var world = mat4.create();
-	mat4.rotateY(world, world, i * Math.PI / 2);
-	mat4.translate(world, world, vec4.fromValues(0, 0, -1.5 * i, 0));
+	// mat4.rotateY(world, world, i * Math.PI / 2);
+	// mat4.translate(world, world, vec4.fromValues(0, 0, -1.5 * i, 0));
 
 	function transform(p) {
 		var pp = vec4.create();
@@ -141,15 +132,7 @@ requestAnimationFrame(function update(time) {
 	slices.forEach(function(slice, i, slices) {
 		ctx.beginPath();
 		slice.forEach(function(p, j) {
-			// p = point(p[0], p[1], p[2]*2);
-			// p = point(p[0], p[1], p[2] - w/4);
-			// p = point(p[0], p[1]*cos(a) - p[2]*sin(a), p[1]*sin(a) + p[2]*cos(a));
-			// p = point(p[0], p[1], p[2] + w/2*2);
-			// p = point(p[0]*cos(a) - p[1]*sin(a), p[0]*sin(a) + p[1]*cos(a), p[2]);
-			// var pp = point(p[0] * n / (n + p[2]), p[1] * n / (n + p[2]));
 			var pp = transform(p);
-			// if(first) console.log(p[2])
-			// console.log(pp[2])
 			// ctx.lineWidth = 5 * ((pp[2] - 1.5) / 1.5 + 0.5)/1.5;
 			if(j == 0) {
 				ctx.moveTo(pp[0], pp[1]);
@@ -163,42 +146,17 @@ requestAnimationFrame(function update(time) {
 		if(i != 0) {
 			ctx.beginPath();
 			slice.forEach(function(p, j) {
-				// var pp = point(p[0] * n / (n + p[2]), p[1] * n / (n + p[2]));
 				var pp = transform(p);
 				ctx.moveTo(pp[0], pp[1]);
 				var P = slices[i - 1][j];
 				var PP = transform(P);
 				ctx.lineTo(PP[0], PP[1]);
-				// ctx.moveTo(pp[0], pp[1]);
 			});
 
 			ctx.closePath();
 			ctx.stroke();
 		}
 	});
-
-	ctx.beginPath();
-	var square = [
-		point(-0.1 + 0.2, -0.1 + 0.3, iii*3),
-		point(0.1 + 0.2, -0.1 + 0.3, iii*3),
-		point(0.1 + 0.2, 0.1 + 0.3, iii*3),
-		point(-0.1 + 0.2, 0.1 + 0.3, iii*3),
-	]
-	.forEach(function(p, i) {
-		var pp = vec4.create();
-		vec3.transformMat4(pp, p, world);
-		vec3.transformMat4(pp, pp, camera);
-		if(i == 0) {
-			ctx.moveTo(pp[0], pp[1]);
-		} else {
-			ctx.lineTo(pp[0], pp[1]);
-		}
-	});
-
-	ctx.closePath();
-	ctx.fillStyle = '#f00';
-	ctx.fill();
-
 
 	ctx.beginPath();
 	for(var v = 0; v <= Math.PI * 2; v += Math.PI * 2 / 16) {
@@ -216,6 +174,29 @@ requestAnimationFrame(function update(time) {
 	ctx.closePath();
 	ctx.fillStyle = '#f00';
 	ctx.fill();
+
+	ctx.beginPath();
+	var square = [
+		point(-0.1 + 0.2, -0.1 + 0.3, 0),
+		point(0.1 + 0.2, -0.1 + 0.3, 0),
+		point(0.1 + 0.2, 0.1 + 0.3, 0),
+		point(-0.1 + 0.2, 0.1 + 0.3, 0),
+	]
+	.forEach(function(p, i) {
+		var pp = vec4.create();
+		vec3.transformMat4(pp, p, world);
+		vec3.transformMat4(pp, pp, camera);
+		if(i == 0) {
+			ctx.moveTo(pp[0], pp[1]);
+		} else {
+			ctx.lineTo(pp[0], pp[1]);
+		}
+	});
+
+	ctx.closePath();
+	ctx.fillStyle = 'rgba(200, 200, 200, 0.5)';
+	ctx.fill();
+
 
 	first = false;
 
