@@ -341,832 +341,6 @@ angular.module('app', ['ngMaterial', 'lib'])
 		}
 	};
 }])
-.directive('testGame5', ['touch', 'size', 'socket', function(touch, size, socket) {
-	return {
-		restrict: 'E',
-		replace: true,
-		template: '<canvas></canvas>',
-		link: function(scope, element, attr) {
-			var canvas = element[0];
-			var w = size;
-			var h = size / 2;
-			canvas.width = w;
-			canvas.height = h;
-			var ctx = canvas.getContext('2d');
-
-			window.fx = 0;
-			window.fy = 0;
-			// var fx = 0, fy = 0;
-
-			element.on('mousemove', function(e) {
-				fx = e.layerX * 2/345 - 1;
-				fy = e.layerY / 173;
-			});
-
-			function update(time) {
-				var tap = touch.getTap();
-				if(tap) {
-					paddlePos.x = tap.x;
-					paddlePos.y = tap.y;
-				}
-			}
-
-			requestAnimationFrame(function render(time) {
-				update(time);
-
-				ctx.save();
-				ctx.clearRect(0, 0, w, h);
-
-				ctx.translate(w / 4, 0);
-				ctx.scale(1/2, 1/2);
-
-				ctx.strokeStyle = '#f00';
-				// ctx.strokeStyle = '#f00';
-				ctx.lineWidth = 10;
-
-				var magic = 1;
-
-				var X = 2, Y = 1, Z = 3;
-
-
-				function point(x, y, z) {
-					return new Point(x, y, z);
-				}
-				function Point(x, y, z) {
-					this.x = x;
-					this.y = y;
-					this.z = z;
-				}
-				Point.prototype = {
-					transform: function() {
-						var k = 0.5/4;
-						var s = 1 - 2*k;
-						var tx = k*w*(Math.pow(s, this.z) - 1)/(s-1);
-						var ty = k*h*(Math.pow(s, this.z) - 1)/(s-1);
-						var scale = Math.pow(s, this.z);
-					
-						var scaleX = scale * w / X;
-						var scaleY = scale * h;
-						var scaleZ = scale;
-
-						var p = new Point(this.x*scaleX + tx + this.z*scaleZ, this.y*scaleY + ty);
-						p.scale = scale;
-						return p;
-						// return new Point(this.x*scaleX + tx + this.z*scaleZ, this.y*scaleY + ty);
-					}
-				};
-
-				[
-					[ point(0, 0, 0), point(0, 0, 3) ],
-					[ point(0, 1, 0), point(0, 1, 3) ],
-
-					[ point(2, 0, 0), point(2, 0, 3) ],
-					[ point(2, 1, 0), point(2, 1, 3) ],
-
-					[ point(0, 0, 0), point(0, 1, 0) ],
-					[ point(2, 0, 0), point(2, 1, 0) ],
-
-					[ point(0, 0, 3), point(0, 1, 3) ],
-					[ point(2, 0, 3), point(2, 1, 3) ],
-
-					[ point(0, 0, 0), point(2, 0, 0) ],
-					[ point(0, 0, 3), point(2, 0, 3) ],
-					[ point(0, 1, 3), point(2, 1, 3) ],
-					[ point(0, 1, 0), point(2, 1, 0) ],
-
-					[ point(0, 0, 1), point(2, 0, 1) ],
-					[ point(0, 1, 1), point(2, 1, 1) ],
-					[ point(0, 0, 1), point(0, 1, 1) ],
-					[ point(2, 0, 1), point(2, 1, 1) ],
-
-					[ point(0, 0, 2), point(2, 0, 2) ],
-					[ point(0, 1, 2), point(2, 1, 2) ],
-					[ point(0, 0, 2), point(0, 1, 2) ],
-					[ point(2, 0, 2), point(2, 1, 2) ],
-				].forEach(function(line) {
-					var p1 = line[0];
-					var p2 = line[1];
-
-					var pp1 = p1.transform();
-					var pp2 = p2.transform();
-
-					ctx.strokeStyle = '#0f0';
-					ctx.beginPath();
-
-					// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
-				
-					ctx.moveTo(pp1.x, pp1.y);
-					ctx.lineTo(pp2.x, pp2.y);
-
-					ctx.closePath();
-					ctx.stroke();
-				});
-
-				// var z = 3;
-				window.z = (Math.asin(Math.sin(time / 400)) + Math.PI/2) / Math.PI * 3;
-				[
-					[ point(0, 0, z), point(2, 0, z) ],
-					[ point(0, 1, z), point(2, 1, z) ],
-					[ point(0, 0, z), point(0, 1, z) ],
-					[ point(2, 0, z), point(2, 1, z) ],
-				].forEach(function(line) {
-					var p1 = line[0];
-					var p2 = line[1];
-
-					var pp1 = p1.transform();
-					var pp2 = p2.transform();
-
-					ctx.strokeStyle = '#fff';
-					ctx.beginPath();
-
-					// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
-				
-					ctx.moveTo(pp1.x, pp1.y);
-					ctx.lineTo(pp2.x, pp2.y);
-					
-					ctx.closePath();
-					ctx.stroke();
-				});
-
-				window.x = 1;
-				// window.x = Math.cos(time / 200) + 1;
-				window.y = 0.5;
-				// window.y = Math.sin(time / 200)*0.5 + 0.5;
-
-				var pw = 1/5;
-				var ph = pw * 2/3;
-
-				// var fx = 0.75;
-				// var fy = 0.35;
-
-
-				[
-					[
-						point(fx - pw/2, fy - ph/2, 3),
-						point(fx + pw/2, fy - ph/2, 3),
-						point(fx + pw/2, fy + ph/2, 3),
-						point(fx - pw/2, fy + ph/2, 3),
-					]
-
-				].forEach(function(points, i) {
-
-					ctx.fillStyle = 'rgba(200, 200, 200, 0.9)';
-					
-					ctx.beginPath();
-					points.forEach(function(p1, i) {
-						var pp1 = p1.transform();
-						if(i == 0) {
-							ctx.moveTo(pp1.x, pp1.y);
-						} else {
-							ctx.lineTo(pp1.x, pp1.y);
-						}
-					});
-					ctx.closePath();
-					ctx.fill();
-
-				});
-
-				[
-					point(x, y, z),
-				].forEach(function(p1) {
-					var pp1 = p1.transform();
-
-					// ctx.fillStyle = '#00f';
-					// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
-
-					ctx.fillStyle = '#f00';
-					ctx.beginPath();
-					ctx.arc(pp1.x, pp1.y, h/21 * pp1.scale, 0, 2 * Math.PI);
-					ctx.closePath();
-					ctx.fill();
-				});
-
-
-				[
-					[
-						point(fx - pw/2, fy - ph/2, 0),
-						point(fx + pw/2, fy - ph/2, 0),
-						point(fx + pw/2, fy + ph/2, 0),
-						point(fx - pw/2, fy + ph/2, 0),
-					]
-
-				].forEach(function(points, i) {
-
-					ctx.fillStyle = 'rgba(200, 200, 200, 0.5)';
-					
-					ctx.beginPath();
-					points.forEach(function(p1, i) {
-						var pp1 = p1.transform();
-						if(i == 0) {
-							ctx.moveTo(pp1.x, pp1.y);
-						} else {
-							ctx.lineTo(pp1.x, pp1.y);
-						}
-					});
-					ctx.closePath();
-					ctx.fill();
-
-				});
-
-				// [
-				// 	// [ point(0.75, 0.25, 1.5 - 1/3), point(1.25, 0.75, 1.5 + 1/3) ],
-				// 	[ point(0.75, 0.25, 1.5 - 1/3), point(0.75, 0.25, 1.5 + 1/3) ],
-				// 	[ point(0.75, 0.25, 1.5 - 1/3), point(0.75, 0.75, 1.5 - 1/3) ],
-
-				// 	[ point(0.75, 0.25, 1.5 - 1/3), point(1.25, 0.25, 1.5 - 1/3) ],
-				// 	[ point(1.25, 0.75, 1.5 - 1/3), point(1.25, 0.75, 1.5 + 1/3) ],
-
-				// 	[ point(1.25, 0.25, 1.5 - 1/3), point(1.25, 0.25, 1.5 + 1/3) ],
-				// 	[ point(1.25, 0.25, 1.5 - 1/3), point(1.25, 0.75, 1.5 - 1/3) ],
-
-				// 	[ point(0.75, 0.75, 1.5 - 1/3), point(1.25, 0.75, 1.5 - 1/3) ],
-				// 	[ point(0.75, 0.75, 1.5 - 1/3), point(0.75, 0.75, 1.5 + 1/3) ],
-
-				// 	[ point(0.75, 0.25, 1.5 + 1/3), point(1.25, 0.25, 1.5 + 1/3) ],
-				// 	[ point(0.75, 0.25, 1.5 + 1/3), point(0.75, 0.75, 1.5 + 1/3) ],
-
-				// 	[ point(1.25, 0.25, 1.5 + 1/3), point(1.25, 0.75, 1.5 + 1/3) ],
-				// 	[ point(0.75, 0.75, 1.5 + 1/3), point(1.25, 0.75, 1.5 + 1/3) ],
-
-				// ].forEach(function(line) {
-				// 	var p1 = line[0];
-				// 	var p2 = line[1];
-
-				// 	var pp1 = p1.transform();
-				// 	var pp2 = p2.transform();
-
-				// 	ctx.strokeStyle = '#0f0';
-				// 	ctx.beginPath();
-
-				// 	// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
-				
-				// 	ctx.moveTo(pp1.x, pp1.y);
-				// 	ctx.lineTo(pp2.x, pp2.y);
-
-				// 	ctx.closePath();
-				// 	ctx.stroke();
-				// });
-			
-				ctx.restore();
-
-				requestAnimationFrame(render);
-			});
-		}
-	};
-}])
-.directive('testGame6', ['touch', 'size', 'socket', function(touch, size, socket) {
-	return {
-		restrict: 'E',
-		replace: true,
-		template: '<canvas></canvas>',
-		link: function(scope, element, attr) {
-			var canvas = element[0];
-			var w = size;
-			var h = size / 2;
-			canvas.width = w;
-			canvas.height = h;
-			var ctx = canvas.getContext('2d');
-
-			var rotation = {x: 0, y: 0, z: 0};
-
-			var paddlePos = {x: w / 4, y: h*7/9};
-			// var ballPos = {x: 0, y: 0, z: 0};
-		
-			function update(time) {
-				var tap = touch.getTap();
-				if(tap) {
-					paddlePos.x = tap.x;
-					paddlePos.y = tap.y;
-				}
-			}
-
-			requestAnimationFrame(function render(time) {
-				update(time);
-
-				ctx.save();
-				ctx.clearRect(0, 0, w, h);
-
-				ctx.translate(w / 4, 0);
-				ctx.scale(1/2, 1/2);
-
-				// ctx.strokeStyle = '#f00';
-				ctx.lineWidth = 10;
-
-				var magic = 1;
-
-				var X = 2, Y = 1, Z = 3;
-
-
-				function point(x, y, z) {
-					return new Point(x, y, z);
-				}
-				function Point(x, y, z) {
-					this.x = x;
-					this.y = y;
-					this.z = z;
-				}
-				Point.prototype = {
-					transform: function() {
-						var k = 0.24 * this.x / X;
-						var s = 1 - 2*k;
-
-						var tx = this.x == 0 ? 0 : k*w*(Math.pow(s, magic) - 1)/(s-1);
-						var ty = this.x == 0 ? 0 : k*h*(Math.pow(s, magic) - 1)/(s-1);
-					
-						var scale = Math.pow(s, magic);
-						var scaleX = scale;
-						var scaleY = scale * h;
-						var scaleZ = scale * w / Z;
-
-						var p = new Point(this.x*scaleX + tx + this.z*scaleZ, this.y*scaleY + ty);
-						p.scale = scale;
-						return p;
-						// return new Point(this.x*scaleX + tx + this.z*scaleZ, this.y*scaleY + ty);
-					}
-				};
-
-				[
-					[ point(0, 0, 0), point(0, 0, 3) ],
-					[ point(0, 1, 0), point(0, 1, 3) ],
-
-					[ point(2, 0, 0), point(2, 0, 3) ],
-					[ point(2, 1, 0), point(2, 1, 3) ],
-
-					[ point(0, 0, 0), point(0, 1, 0) ],
-					[ point(2, 0, 0), point(2, 1, 0) ],
-
-					[ point(0, 0, 3), point(0, 1, 3) ],
-					[ point(2, 0, 3), point(2, 1, 3) ],
-
-					[ point(0, 0, 0), point(2, 0, 0) ],
-					[ point(0, 0, 3), point(2, 0, 3) ],
-					[ point(0, 1, 3), point(2, 1, 3) ],
-					[ point(0, 1, 0), point(2, 1, 0) ],
-
-					[ point(0, 0, 1), point(2, 0, 1) ],
-					[ point(0, 1, 1), point(2, 1, 1) ],
-					[ point(0, 0, 1), point(0, 1, 1) ],
-					[ point(2, 0, 1), point(2, 1, 1) ],
-
-					[ point(0, 0, 2), point(2, 0, 2) ],
-					[ point(0, 1, 2), point(2, 1, 2) ],
-					[ point(0, 0, 2), point(0, 1, 2) ],
-					[ point(2, 0, 2), point(2, 1, 2) ],
-				].forEach(function(line) {
-					var p1 = line[0];
-					var p2 = line[1];
-
-					var pp1 = p1.transform();
-					var pp2 = p2.transform();
-
-					ctx.strokeStyle = '#0f0';
-					ctx.beginPath();
-
-					// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
-				
-					ctx.moveTo(pp1.x, pp1.y);
-					ctx.lineTo(pp2.x, pp2.y);
-
-					ctx.closePath();
-					ctx.stroke();
-				});
-
-				// var z = 3;
-				// var z = (Math.asin(Math.sin(time / 400)) + Math.PI/2) / Math.PI * 3;
-				[
-					[ point(0, 0, z), point(2, 0, z) ],
-					[ point(0, 1, z), point(2, 1, z) ],
-					[ point(0, 0, z), point(0, 1, z) ],
-					[ point(2, 0, z), point(2, 1, z) ],
-				].forEach(function(line) {
-					var p1 = line[0];
-					var p2 = line[1];
-
-					var pp1 = p1.transform();
-					var pp2 = p2.transform();
-
-					ctx.strokeStyle = '#fff';
-					ctx.beginPath();
-
-					// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
-				
-					ctx.moveTo(pp1.x, pp1.y);
-					ctx.lineTo(pp2.x, pp2.y);
-
-					ctx.closePath();
-					ctx.stroke();
-				});
-
-				// // var x = 1.75;
-				// var x = Math.cos(time / 200) + 1;
-				// var y = 0;
-				// var y = Math.sin(time / 200)*0.5 + 0.5;
-				[
-					point(x, y, z),
-				].forEach(function(p1) {
-					var pp1 = p1.transform();
-
-					// ctx.fillStyle = '#00f';
-					// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
-
-					ctx.fillStyle = '#f00';
-					ctx.beginPath();
-					ctx.arc(pp1.x, pp1.y, h/21 * pp1.scale, 0, 2 * Math.PI);
-					ctx.closePath();
-					ctx.fill();
-				});
-
-				var pw = 1/5;
-				var ph = pw * 2/3;
-
-				// var fx = 0.75;
-				// var fy = 0.35;
-				[
-					[
-						point(fx - pw/2, fy - ph/2, 0),
-						point(fx + pw/2, fy - ph/2, 0),
-						point(fx + pw/2, fy + ph/2, 0),
-						point(fx - pw/2, fy + ph/2, 0),
-					],
-					[
-						point(fx - pw/2, fy - ph/2, 3),
-						point(fx + pw/2, fy - ph/2, 3),
-						point(fx + pw/2, fy + ph/2, 3),
-						point(fx - pw/2, fy + ph/2, 3),
-					]
-
-				].forEach(function(points, i) {
-
-					if(i == 0) {
-						ctx.fillStyle = 'rgba(200, 200, 200, 0.8)';
-					}
-					if(i == 1) {
-						ctx.fillStyle = 'rgba(200, 200, 200, 0.8)';
-					}
-					ctx.beginPath();
-					points.forEach(function(p1, i) {
-						var pp1 = p1.transform();
-						if(i == 0) {
-							ctx.moveTo(pp1.x, pp1.y);
-						} else {
-							ctx.lineTo(pp1.x, pp1.y);
-						}
-					});
-					ctx.closePath();
-					ctx.fill();
-
-				});
-
-				// [
-				// 	// [ point(0.75, 0.25, 1.5 - 1/3), point(1.25, 0.75, 1.5 + 1/3) ],
-				// 	[ point(0.75, 0.25, 1.5 - 1/3), point(0.75, 0.25, 1.5 + 1/3) ],
-				// 	[ point(0.75, 0.25, 1.5 - 1/3), point(0.75, 0.75, 1.5 - 1/3) ],
-
-				// 	[ point(0.75, 0.25, 1.5 - 1/3), point(1.25, 0.25, 1.5 - 1/3) ],
-				// 	[ point(1.25, 0.75, 1.5 - 1/3), point(1.25, 0.75, 1.5 + 1/3) ],
-
-				// 	[ point(1.25, 0.25, 1.5 - 1/3), point(1.25, 0.25, 1.5 + 1/3) ],
-				// 	[ point(1.25, 0.25, 1.5 - 1/3), point(1.25, 0.75, 1.5 - 1/3) ],
-
-				// 	[ point(0.75, 0.75, 1.5 - 1/3), point(1.25, 0.75, 1.5 - 1/3) ],
-				// 	[ point(0.75, 0.75, 1.5 - 1/3), point(0.75, 0.75, 1.5 + 1/3) ],
-
-				// 	[ point(0.75, 0.25, 1.5 + 1/3), point(1.25, 0.25, 1.5 + 1/3) ],
-				// 	[ point(0.75, 0.25, 1.5 + 1/3), point(0.75, 0.75, 1.5 + 1/3) ],
-
-				// 	[ point(1.25, 0.25, 1.5 + 1/3), point(1.25, 0.75, 1.5 + 1/3) ],
-				// 	[ point(0.75, 0.75, 1.5 + 1/3), point(1.25, 0.75, 1.5 + 1/3) ],
-
-				// ].forEach(function(line) {
-				// 	var p1 = line[0];
-				// 	var p2 = line[1];
-
-				// 	var pp1 = p1.transform();
-				// 	var pp2 = p2.transform();
-
-				// 	ctx.strokeStyle = '#0f0';
-				// 	ctx.beginPath();
-
-				// 	// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
-				
-				// 	ctx.moveTo(pp1.x, pp1.y);
-				// 	ctx.lineTo(pp2.x, pp2.y);
-
-				// 	ctx.closePath();
-				// 	ctx.stroke();
-				// });
-
-
-				ctx.restore();
-
-				requestAnimationFrame(render);
-			});
-		}
-	};
-}])
-.directive('testGame7', ['touch', 'size', 'socket', function(touch, size, socket) {
-	return {
-		restrict: 'E',
-		replace: true,
-		template: '<canvas></canvas>',
-		link: function(scope, element, attr) {
-			var canvas = element[0];
-			var w = size;
-			var h = size / 2;
-			canvas.width = w;
-			canvas.height = h;
-			var ctx = canvas.getContext('2d');
-
-			var rotation = {x: 0, y: 0, z: 0};
-
-			var paddlePos = {x: w / 4, y: h*7/9};
-			// var ballPos = {x: 0, y: 0, z: 0};
-		
-			function update(time) {
-				var tap = touch.getTap();
-				if(tap) {
-					paddlePos.x = tap.x;
-					paddlePos.y = tap.y;
-				}
-			}
-
-			requestAnimationFrame(function render(time) {
-				update(time);
-
-				ctx.save();
-				ctx.clearRect(0, 0, w, h);
-
-				ctx.translate(w / 4, 0);
-				ctx.scale(1/2, 1/2);
-
-				// ctx.strokeStyle = '#f00';
-				ctx.lineWidth = 10;
-
-				var magic = 1;
-
-				var X = 2, Y = 1, Z = 3;
-
-
-				function point(x, y, z) {
-					return new Point(x, y, z);
-				}
-				function Point(x, y, z) {
-					this.x = x;
-					this.y = y;
-					this.z = z;
-				}
-				Point.prototype = {
-					transform1: function() {
-						var k = 0.5/4;
-						var s = 1 - 2*k;
-						var tx = k*w*(Math.pow(s, this.z) - 1)/(s-1);
-						var ty = k*h*(Math.pow(s, this.z) - 1)/(s-1);
-						var scale = Math.pow(s, this.z);
-					
-						var scaleX = scale * w / X;
-						var scaleY = scale * h;
-						var scaleZ = scale;
-
-						var p = new Point(this.x*scaleX + tx + this.z*scaleZ, this.y*scaleY + ty);
-						p.scale = scale;
-						return p;
-						// return new Point(this.x*scaleX + tx + this.z*scaleZ, this.y*scaleY + ty);
-					},
-					transform2: function() {
-						var k = 0.24 * this.x / X;
-						var s = 1 - 2*k;
-
-						var tx = this.x == 0 ? 0 : k*w*(Math.pow(s, magic) - 1)/(s-1);
-						var ty = this.x == 0 ? 0 : k*h*(Math.pow(s, magic) - 1)/(s-1);
-					
-						var scale = Math.pow(s, magic);
-						var scaleX = scale;
-						var scaleY = scale * h;
-						var scaleZ = scale * w / Z;
-
-						var p = new Point(this.x*scaleX + tx + this.z*scaleZ, this.y*scaleY + ty);
-						p.scale = scale;
-						return p;
-						// return new Point(this.x*scaleX + tx + this.z*scaleZ, this.y*scaleY + ty);
-					},
-					transform: function() {
-						var interp = (Math.asin(Math.sin(time / 800)) + Math.PI/2) / Math.PI;
-						// interp = interp*interp*(3 - 2*interp);
-						// interp = interp*interp*interp*(interp*(interp*6 - 15) + 10);
-						interp = interp*interp*interp*interp*(35 + interp*(-84 + interp*(70 - interp*20)));
-						// -20x^7+70x^6-84x^5+35x^4
-
-						var p1 = this.transform1();
-						var p2 = this.transform2();
-
-						var p =  Point.add(Point.scale(p1, interp), Point.scale(p2, 1 - interp));
-						p.scale = p1.scale * interp + p2.scale * (1 - interp);
-						return p;
-					}
-				};
-				Point.scale = function(p, s) {
-					return point(p.x * s, p.y * s, p.z * s);
-				};
-				Point.add = function(p1, p2) {
-					return point(p1.x + p2.x, p1.y + p2.y, p1.x + p2.x);
-				};
-
-				[
-					[ point(0, 0, 0), point(0, 0, 3) ],
-					[ point(0, 1, 0), point(0, 1, 3) ],
-
-					[ point(2, 0, 0), point(2, 0, 3) ],
-					[ point(2, 1, 0), point(2, 1, 3) ],
-
-					[ point(0, 0, 0), point(0, 1, 0) ],
-					[ point(2, 0, 0), point(2, 1, 0) ],
-
-					[ point(0, 0, 3), point(0, 1, 3) ],
-					[ point(2, 0, 3), point(2, 1, 3) ],
-
-					[ point(0, 0, 0), point(2, 0, 0) ],
-					[ point(0, 0, 3), point(2, 0, 3) ],
-					[ point(0, 1, 3), point(2, 1, 3) ],
-					[ point(0, 1, 0), point(2, 1, 0) ],
-
-					[ point(0, 0, 1), point(2, 0, 1) ],
-					[ point(0, 1, 1), point(2, 1, 1) ],
-					[ point(0, 0, 1), point(0, 1, 1) ],
-					[ point(2, 0, 1), point(2, 1, 1) ],
-
-					[ point(0, 0, 2), point(2, 0, 2) ],
-					[ point(0, 1, 2), point(2, 1, 2) ],
-					[ point(0, 0, 2), point(0, 1, 2) ],
-					[ point(2, 0, 2), point(2, 1, 2) ],
-				].forEach(function(line) {
-					var p1 = line[0];
-					var p2 = line[1];
-
-					var pp1 = p1.transform();
-					var pp2 = p2.transform();
-
-					ctx.strokeStyle = '#0f0';
-					ctx.beginPath();
-
-					// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
-				
-					ctx.moveTo(pp1.x, pp1.y);
-					ctx.lineTo(pp2.x, pp2.y);
-
-					ctx.closePath();
-					ctx.stroke();
-				});
-
-				// var z = 3;
-				// var z = (Math.asin(Math.sin(time / 400)) + Math.PI/2) / Math.PI * 3;
-				[
-					[ point(0, 0, z), point(2, 0, z) ],
-					[ point(0, 1, z), point(2, 1, z) ],
-					[ point(0, 0, z), point(0, 1, z) ],
-					[ point(2, 0, z), point(2, 1, z) ],
-				].forEach(function(line) {
-					var p1 = line[0];
-					var p2 = line[1];
-
-					var pp1 = p1.transform();
-					var pp2 = p2.transform();
-
-					ctx.strokeStyle = '#fff';
-					ctx.beginPath();
-
-					// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
-				
-					ctx.moveTo(pp1.x, pp1.y);
-					ctx.lineTo(pp2.x, pp2.y);
-
-					ctx.closePath();
-					ctx.stroke();
-				});
-
-				// // var x = 1.75;
-				// var x = Math.cos(time / 200) + 1;
-				// var y = 0;
-				// var y = Math.sin(time / 200)*0.5 + 0.5;
-
-				var pw = 1/5;
-				var ph = pw * 2/3;
-
-				// var fx = 0.75;
-				// var fy = 0.35;
-				[
-					[
-						point(fx - pw/2, fy - ph/2, 3),
-						point(fx + pw/2, fy - ph/2, 3),
-						point(fx + pw/2, fy + ph/2, 3),
-						point(fx - pw/2, fy + ph/2, 3),
-					]
-
-				].forEach(function(points, i) {
-
-					ctx.fillStyle = 'rgba(200, 200, 200, 0.9)';
-					
-					ctx.beginPath();
-					points.forEach(function(p1, i) {
-						var pp1 = p1.transform();
-						if(i == 0) {
-							ctx.moveTo(pp1.x, pp1.y);
-						} else {
-							ctx.lineTo(pp1.x, pp1.y);
-						}
-					});
-					ctx.closePath();
-					ctx.fill();
-
-				});
-
-				[
-					point(x, y, z),
-				].forEach(function(p1) {
-					var pp1 = p1.transform();
-
-					// ctx.fillStyle = '#00f';
-					// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
-
-					ctx.fillStyle = '#f00';
-					ctx.beginPath();
-					ctx.arc(pp1.x, pp1.y, h/21 * pp1.scale, 0, 2 * Math.PI);
-					ctx.closePath();
-					ctx.fill();
-				});
-
-				[
-					[
-						point(fx - pw/2, fy - ph/2, 0),
-						point(fx + pw/2, fy - ph/2, 0),
-						point(fx + pw/2, fy + ph/2, 0),
-						point(fx - pw/2, fy + ph/2, 0),
-					]
-
-				].forEach(function(points, i) {
-
-					ctx.fillStyle = 'rgba(200, 200, 200, 0.5)';
-					
-					ctx.beginPath();
-					points.forEach(function(p1, i) {
-						var pp1 = p1.transform();
-						if(i == 0) {
-							ctx.moveTo(pp1.x, pp1.y);
-						} else {
-							ctx.lineTo(pp1.x, pp1.y);
-						}
-					});
-					ctx.closePath();
-					ctx.fill();
-
-				});
-
-				// [
-				// 	// [ point(0.75, 0.25, 1.5 - 1/3), point(1.25, 0.75, 1.5 + 1/3) ],
-				// 	[ point(0.75, 0.25, 1.5 - 1/3), point(0.75, 0.25, 1.5 + 1/3) ],
-				// 	[ point(0.75, 0.25, 1.5 - 1/3), point(0.75, 0.75, 1.5 - 1/3) ],
-
-				// 	[ point(0.75, 0.25, 1.5 - 1/3), point(1.25, 0.25, 1.5 - 1/3) ],
-				// 	[ point(1.25, 0.75, 1.5 - 1/3), point(1.25, 0.75, 1.5 + 1/3) ],
-
-				// 	[ point(1.25, 0.25, 1.5 - 1/3), point(1.25, 0.25, 1.5 + 1/3) ],
-				// 	[ point(1.25, 0.25, 1.5 - 1/3), point(1.25, 0.75, 1.5 - 1/3) ],
-
-				// 	[ point(0.75, 0.75, 1.5 - 1/3), point(1.25, 0.75, 1.5 - 1/3) ],
-				// 	[ point(0.75, 0.75, 1.5 - 1/3), point(0.75, 0.75, 1.5 + 1/3) ],
-
-				// 	[ point(0.75, 0.25, 1.5 + 1/3), point(1.25, 0.25, 1.5 + 1/3) ],
-				// 	[ point(0.75, 0.25, 1.5 + 1/3), point(0.75, 0.75, 1.5 + 1/3) ],
-
-				// 	[ point(1.25, 0.25, 1.5 + 1/3), point(1.25, 0.75, 1.5 + 1/3) ],
-				// 	[ point(0.75, 0.75, 1.5 + 1/3), point(1.25, 0.75, 1.5 + 1/3) ],
-
-				// ].forEach(function(line) {
-				// 	var p1 = line[0];
-				// 	var p2 = line[1];
-
-				// 	var pp1 = p1.transform();
-				// 	var pp2 = p2.transform();
-
-				// 	ctx.strokeStyle = '#0f0';
-				// 	ctx.beginPath();
-
-				// 	// ctx.fillRect(pp1.x - 10, pp1.y - 10, 20, 20);
-				
-				// 	ctx.moveTo(pp1.x, pp1.y);
-				// 	ctx.lineTo(pp2.x, pp2.y);
-
-				// 	ctx.closePath();
-				// 	ctx.stroke();
-				// });
-
-
-				ctx.restore();
-
-				requestAnimationFrame(render);
-			});
-		}
-	};
-}])
 .directive('testGameNew', ['touch', 'size', 'socket', function(touch, size, socket) {
 	return {
 		restrict: 'E',
@@ -1225,39 +399,286 @@ angular.module('app', ['ngMaterial', 'lib'])
 
 			// var paddlePos = {x: 0.2, y: 0.3};
 
-			var paddlePos = point(fx - 1, fy - 0.5, 0.2);
-			var ballPos = point(-0.3, -0.1, 0);
-			var ballVel = point(0, 0, 1.5);
-
-			function update(time) {
-			// 	var tap = touch.getTap();
-			// 	if(tap) {
-			// 		paddlePos.x = (tap.x - w/2) / (w/2) * 2;
-			// 		paddlePos.y = (tap.y - h/2) / (h/2) * 1;
-			// 	}
-			}
+			// var ball.vel = point(0, 0, 1.5);
 
 			var fx = 0;
 			var fy = 0;
 			// var fx = 0, fy = 0;
+
+			var pw = 0.2;
+			var ph = pw * 2/3;
 
 			element.on('mousemove', function(e) {
 				fx = e.layerX * 2/345 - 1;
 				fy = e.layerY / 173;
 			});
 
+			function Ball() {
+
+			}
+			Ball.prototype = {
+				pos: point(-0.3, -0.1, 1),
+				vel: point(0, 0, 2),
+				acc: point(0, 0, 0),
+				// vel: point(0.2, -0.1, 2),
+				r: 0.1,
+				update: function(time, dt) {
+					vec4.add(this.vel, this.vel, vec4.fromValues(this.acc[0] * dt, this.acc[1] * dt, this.acc[2] * dt, 0));
+
+					vec4.add(this.pos, this.pos, vec4.fromValues(this.vel[0] * dt, this.vel[1] * dt, this.vel[2] * dt, 0));
+
+					// this.acc = point(Math.pow(Math.E, 0.9 * dt));
+
+					vec3.scale(this.acc, this.acc, 0.999);
+
+					if(this.pos[2] >= 3) {
+						this.pos = point(this.pos[0], this.pos[1], 3);
+
+						this.vel = point(this.vel[0], this.vel[1], -this.vel[2]);
+						// this.vel = point(-this.vel[0] + paddleVel[0] * 6, -this.vel[1] + -paddleVel[1] * 6, -this.vel[2]);
+						// this.vel = point(paddleVel[0] * 6, -paddleVel[1] * 6, -this.vel[2]);
+						// this.vel = point(paddleVel[0], paddleVel[1], -this.vel[2]);
+					}
+					if(this.pos[2] <= 0) {
+						this.pos = point(this.pos[0], this.pos[1], 0);
+						// this.vel = point(0, 0, -this.vel[2]);
+						// this.vel = point(this.vel[0] + paddle.vel[0] * 6, this.vel[1] + -paddle.vel[1] * 6, -this.vel[2]);
+						// this.vel = point(this.vel[0], this.vel[1], -this.vel[2]);
+						// vec4.normalize(this.vel, this.vel);
+						
+						if(this.pos[0] + this.r >= paddle.pos[0] - paddle.w
+						&& this.pos[0] - this.r <= paddle.pos[0] + paddle.w
+						&& -this.pos[1] + this.r >= paddle.pos[1] - paddle.h
+						&& -this.pos[1] - this.r <= paddle.pos[1] + paddle.h) {
+
+							this.vel = point(this.vel[0], this.vel[1], -this.vel[2]);
+							// this.vel = point(this.vel[0] + paddle.vel[0] * 6, this.vel[1] + -paddle.vel[1] * 6, -this.vel[2]);
+
+							this.acc = point(paddle.vel[0] * 12, -paddle.vel[1] * 12, 0);
+
+							this.hitTime = time;
+						} else {
+							this.vel = point(this.vel[0], this.vel[1], -this.vel[2]);
+						}
+
+					}
+					if(this.pos[1] >= 0.5) {
+						this.pos = point(this.pos[0], 0.5, this.pos[2]);
+						this.vel = point(this.vel[0], -this.vel[1], this.vel[2]);
+					}
+					if(this.pos[1] <= -0.5) {
+						this.pos = point(this.pos[0], -0.5, this.pos[2]);
+						this.vel = point(this.vel[0], -this.vel[1], this.vel[2]);
+					}
+
+					if(this.pos[0] >= 1) {
+						this.pos = point(1, this.pos[1], this.pos[2]);
+						this.vel = point(-this.vel[0], this.vel[1], this.vel[2]);
+					}
+					if(this.pos[0] <= -1) {
+						this.pos = point(-1, this.pos[1], this.pos[2]);
+						this.vel = point(-this.vel[0], this.vel[1], this.vel[2]);
+					}
+
+					if(time - this.hitTime < 1000) {
+						this.color = '#00f';
+					} else {
+						this.color = '#f00';
+					}
+				},
+				render: function(ctx, world, camera) {
+					ctx.fillStyle = this.color;
+					// ctx.fillStyle = '#f00';
+
+					[
+						[
+							point(this.pos[0], this.pos[1], this.pos[2] + this.r),
+							point(this.pos[0] + this.r, this.pos[1], this.pos[2]),
+							point(this.pos[0], this.pos[1] + this.r, this.pos[2]),
+						],
+						[
+							point(this.pos[0], this.pos[1], this.pos[2] + this.r),
+							point(this.pos[0] - this.r, this.pos[1], this.pos[2]),
+							point(this.pos[0], this.pos[1] + this.r, this.pos[2]),
+						],
+						[
+							point(this.pos[0], this.pos[1], this.pos[2] + this.r),
+							point(this.pos[0] + this.r, this.pos[1], this.pos[2]),
+							point(this.pos[0], this.pos[1] - this.r, this.pos[2]),
+						],
+						[
+							point(this.pos[0], this.pos[1], this.pos[2] + this.r),
+							point(this.pos[0] - this.r, this.pos[1], this.pos[2]),
+							point(this.pos[0], this.pos[1] - this.r, this.pos[2]),
+						],
+
+						[
+							point(this.pos[0], this.pos[1], this.pos[2] - this.r),
+							point(this.pos[0] + this.r, this.pos[1], this.pos[2]),
+							point(this.pos[0], this.pos[1] + this.r, this.pos[2]),
+						],
+						[
+							point(this.pos[0], this.pos[1], this.pos[2] - this.r),
+							point(this.pos[0] - this.r, this.pos[1], this.pos[2]),
+							point(this.pos[0], this.pos[1] + this.r, this.pos[2]),
+						],
+						[
+							point(this.pos[0], this.pos[1], this.pos[2] - this.r),
+							point(this.pos[0] + this.r, this.pos[1], this.pos[2]),
+							point(this.pos[0], this.pos[1] - this.r, this.pos[2]),
+						],
+						[
+							point(this.pos[0], this.pos[1], this.pos[2] - this.r),
+							point(this.pos[0] - this.r, this.pos[1], this.pos[2]),
+							point(this.pos[0], this.pos[1] - this.r, this.pos[2]),
+						],
+					]
+					.forEach(function(face) {
+						ctx.beginPath();
+						face.forEach(function(p, i) {
+							var pp = vec4.create();
+							vec3.transformMat4(pp, p, world);
+							vec3.transformMat4(pp, pp, camera);
+							if(i == 0) {
+								ctx.moveTo(pp[0], pp[1]);
+							} else {
+								ctx.lineTo(pp[0], pp[1]);
+							}
+						});
+						ctx.closePath();
+						ctx.fill();
+					});
+
+					ctx.beginPath();
+					for(var v = 0; v <= Math.PI * 2; v += Math.PI * 2 / 16) {
+						var b = point(Math.cos(v) * this.r + this.pos[0], Math.sin(v) * this.r + this.pos[1], this.pos[2]);
+						var bp = vec4.create();
+						vec3.transformMat4(bp, b, world);
+						vec3.transformMat4(bp, bp, camera);
+						// if(first) console.log(v)
+						if(v == 0) {
+							ctx.moveTo(bp[0], bp[1]);
+						} else {
+							ctx.lineTo(bp[0], bp[1]);
+						}
+					}
+					ctx.closePath();
+					ctx.fill();
+
+					ctx.beginPath();
+					for(var v = 0; v <= Math.PI * 2; v += Math.PI * 2 / 16) {
+						var b = point(this.pos[0], Math.sin(v) * this.r + this.pos[1], Math.cos(v) * this.r + this.pos[2]);
+						var bp = vec4.create();
+						vec3.transformMat4(bp, b, world);
+						vec3.transformMat4(bp, bp, camera);
+						// if(first) console.log(v)
+						if(v == 0) {
+							ctx.moveTo(bp[0], bp[1]);
+						} else {
+							ctx.lineTo(bp[0], bp[1]);
+						}
+					}
+					ctx.closePath();
+					ctx.fill();
+				}
+			};
+
+			function Paddle(z, color) {
+				this.pos = point(1, 0.5, z);
+				this.color = color;
+			}
+			Paddle.prototype = {
+				pos: null,
+				lastPos: null,
+				vel: null,
+				w: 0.2,
+				h: 0.2 * 2/3,
+				update: function(time, dt) {
+					var tap = touch.getTap();
+
+					this.lastPos = this.pos;
+					if(tap != null) {
+						fx = tap.x * 2;
+						fy = tap.y * 2;
+					}
+
+					this.pos = point(fx - 1, fy - 0.5, 0);
+
+					this.keepWithinBounds();
+
+					this.vel = vec4.create();
+					vec4.subtract(this.vel, this.pos, this.lastPos);
+				},
+				render: function(ctx, world, camera) {
+					ctx.beginPath();
+					[
+						point(-this.w + this.pos[0], -this.h - this.pos[1], this.pos[2]),
+						point(this.w + this.pos[0], -this.h - this.pos[1], this.pos[2]),
+						point(this.w + this.pos[0], this.h - this.pos[1], this.pos[2]),
+						point(-this.w + this.pos[0], this.h - this.pos[1], this.pos[2]),
+					]
+					.forEach(function(p, i) {
+						var pp = vec4.create();
+						vec3.transformMat4(pp, p, world);
+						vec3.transformMat4(pp, pp, camera);
+						if(i == 0) {
+							ctx.moveTo(pp[0], pp[1]);
+						} else {
+							ctx.lineTo(pp[0], pp[1]);
+						}
+					});
+
+					ctx.closePath();
+					ctx.fillStyle = this.color;
+					ctx.fill();
+				},
+				keepWithinBounds: function() {
+					if(this.pos[0] <= -(1 - this.w)) {
+						this.pos = point(-(1 - this.w), this.pos[1], this.pos[2]);
+					}
+					if(this.pos[0] >= 1 - this.w) {
+						this.pos = point(1 - this.w, this.pos[1], this.pos[2]);
+					}
+
+					if(this.pos[1] <= -(0.5 - this.h)) {
+						this.pos = point(this.pos[0], -(0.5 - this.h), this.pos[2]);
+					}
+
+					if(this.pos[1] >= 0.5 - this.h) {
+						this.pos = point(this.pos[0], 0.5 - this.h, this.pos[2]);
+					}
+				}
+			}
+
+			var paddle = new Paddle(0, 'rgba(200, 200, 200, 0.5)');
+			var backPaddle = new Paddle(3, 'rgba(200, 200, 200, 0.8)');
+			backPaddle.update = function(time, dt) {
+				// this.pos = point(paddle.pos[0], paddle.pos[1], this.pos[2]);
+				this.pos = point(ball.pos[0], -ball.pos[1], this.pos[2]);
+				this.keepWithinBounds();
+			};
+
+			var ball = new Ball();
+
+			window.paddle = paddle; window.backPaddle = backPaddle; window.ball = ball;
+
+			function update(time, dt) {
+
+				paddle.update(time, dt);
+
+				ball.update(time, dt);
+
+				backPaddle.update(time, dt);
+			}
 			var first = true;
 
 			// var lastTime = null;
 			var lastTime = 0;
 			requestAnimationFrame(function tick(time) {
 
-				update(time);
-
-				// if(!lastTime) lastTime = time;
-
-				// var dt = (time - lastTime) / 1400;
 				var dt = (time - lastTime) / 1000;
+
+				update(time, dt);
 
 				ctx.clearRect(0, 0, w, h);
 				// ctx.clearRect(-w/2, -h/2, w, h);
@@ -1274,8 +695,11 @@ angular.module('app', ['ngMaterial', 'lib'])
 				mat4.scale(camera, camera, vec4.fromValues((w / 2)*(w / 4), (h / 2)*(h / 4), -1, 1));
 				mat4.translate(camera, camera, vec4.fromValues(0, 0, n, 0));
 
-				var i = (Math.asin(Math.sin(time / 800)) + Math.PI/2) / Math.PI;
-				i = i*i*i*i*(35 + i*(-84 + i*(70 - i*20)));
+				// var i = (Math.asin(Math.sin(time / 800)) + Math.PI/2) / Math.PI;
+				// i = i*i*i*i*(35 + i*(-84 + i*(70 - i*20)));
+
+				var i = 0;
+				// var i = 1;
 
 				var ii = (Math.asin(Math.sin(time / 800 * 2)) + Math.PI/2) / Math.PI;
 				ii = ii*ii*ii*ii*(35 + ii*(-84 + ii*(70 - ii*20)));
@@ -1283,11 +707,9 @@ angular.module('app', ['ngMaterial', 'lib'])
 				var iii = (Math.asin(Math.sin(time / 800 * 2)) + Math.PI/2) / Math.PI;
 				// iii = iii*iii*iii*iii*(35 + iii*(-84 + iii*(70 - iii*20)));
 
-
 				mat4.translate(camera, camera, vec4.fromValues(0, 0, i*1.5, 0));
-				// mat4.translate(camera, camera, vec4.fromValues(0, 0, 1.5, 0));
 
-				var a = time / 500;
+				// mat4.translate(camera, camera, vec4.fromValues(0, 0, 1.5, 0));
 
 				var tunnelMatrix = mat4.create();
 				mat4.translate(tunnelMatrix, tunnelMatrix, vec4.fromValues(0, 0, 1.5, 0));
@@ -1296,52 +718,15 @@ angular.module('app', ['ngMaterial', 'lib'])
 
 				var world = mat4.create();
 				// mat4.scale(world, world, vec4.fromValues(1, 1, 1/2, 1));
+
 				mat4.rotateY(world, world, i * Math.PI / 2);
 				mat4.translate(world, world, vec4.fromValues(0, 0, -1.5 * i, 0));
+
 				// mat4.rotateY(world, world, Math.PI / 2);
 				// mat4.translate(world, world, vec4.fromValues(0, 0, -1.5, 0));
 
-
-				var lastPaddlePos = paddlePos;
-				paddlePos = point(fx - 1, fy - 0.5, 0);
-				// ballPos = point(ballPos[0], ballPos[1], iii * 3);
-				// ballPos = point(ballPos[0], ballPos[1], iii * 3);
-				var ball = mat4.create();
-				mat4.translate(ball, ball, vec4.fromValues(ballVel[0] * dt, ballVel[1] * dt, ballVel[2] * dt, 0));
-				vec3.transformMat4(ballPos, ballPos, ball);
-
-				var paddleVel = vec4.create();
-				vec4.subtract(paddleVel, paddlePos, lastPaddlePos);
-
-				if(ballPos[2] >= 3) {
-					ballPos = point(ballPos[0], ballPos[1], 3);
-
-					ballVel = point(paddleVel[0] * 4, -paddleVel[1] * 4, -ballVel[2]);
-					// ballVel = point(paddleVel[0], paddleVel[1], -ballVel[2]);
-				}
-				if(ballPos[2] <= 0) {
-					ballPos = point(ballPos[0], ballPos[1], 0);
-					// ballVel = point(0, 0, -ballVel[2]);
-					ballVel = point(paddleVel[0] * 4, -paddleVel[1] * 4, -ballVel[2]);
-					// vec4.normalize(ballVel, ballVel);
-				}
-				if(ballPos[1] >= 0.5) {
-					ballPos = point(ballPos[0], 0.5, ballPos[2]);
-					ballVel = point(ballVel[0], -ballVel[1], ballVel[2]);
-				}
-				if(ballPos[1] <= -0.5) {
-					ballPos = point(ballPos[0], -0.5, ballPos[2]);
-					ballVel = point(ballVel[0], -ballVel[1], ballVel[2]);
-				}
-
-				if(ballPos[0] >= 1) {
-					ballPos = point(1, ballPos[1], ballPos[2]);
-					ballVel = point(-ballVel[0], ballVel[1], ballVel[2]);
-				}
-				if(ballPos[0] <= -1) {
-					ballPos = point(-1, ballPos[1], ballPos[2]);
-					ballVel = point(-ballVel[0], ballVel[1], ballVel[2]);
-				}
+				// ball.pos = point(ball.pos[0], ball.pos[1], iii * 3);
+				// ball.pos = point(ball.pos[0], ball.pos[1], iii * 3);
 
 				function transform(p) {
 					var pp = vec4.create();
@@ -1390,146 +775,35 @@ angular.module('app', ['ngMaterial', 'lib'])
 					}
 				});
 
-				var pw = 0.15;
-				var ph = pw * 2/3;
+				ctx.strokeStyle = '#fff';
+				ctx.lineWidth = 2;
+				
 				ctx.beginPath();
 				[
-					point(-pw + ballPos[0], -ph + ballPos[1], 3),
-					point(pw + ballPos[0], -ph + ballPos[1], 3),
-					point(pw + ballPos[0], ph + ballPos[1], 3),
-					point(-pw + ballPos[0], ph + ballPos[1], 3),
+					point(-1, -1/2, ball.pos[2]),
+					point(1, -1/2, ball.pos[2]),
+					point(1, 1/2, ball.pos[2]),
+					point(-1, 1/2, ball.pos[2]),
 				]
-				.forEach(function(p, i) {
+				.forEach(function(p, j) {
 					var pp = vec4.create();
 					vec3.transformMat4(pp, p, world);
 					vec3.transformMat4(pp, pp, camera);
-					if(i == 0) {
+					// ctx.lineWidth = 5 * ((pp[2] - 1.5) / 1.5 + 0.5)/1.5;
+					if(j == 0) {
 						ctx.moveTo(pp[0], pp[1]);
 					} else {
 						ctx.lineTo(pp[0], pp[1]);
 					}
 				});
 				ctx.closePath();
-				ctx.fillStyle = 'rgba(200, 200, 200, 0.8)';
-				ctx.fill();
+				ctx.stroke();
 
-				var br = 0.1;
+				backPaddle.render(ctx, world, camera);
 
-				[
-					[
-						point(ballPos[0], ballPos[1], ballPos[2] + br),
-						point(ballPos[0] + br, ballPos[1], ballPos[2]),
-						point(ballPos[0], ballPos[1] + br, ballPos[2]),
-					],
-					[
-						point(ballPos[0], ballPos[1], ballPos[2] + br),
-						point(ballPos[0] - br, ballPos[1], ballPos[2]),
-						point(ballPos[0], ballPos[1] + br, ballPos[2]),
-					],
-					[
-						point(ballPos[0], ballPos[1], ballPos[2] + br),
-						point(ballPos[0] + br, ballPos[1], ballPos[2]),
-						point(ballPos[0], ballPos[1] - br, ballPos[2]),
-					],
-					[
-						point(ballPos[0], ballPos[1], ballPos[2] + br),
-						point(ballPos[0] - br, ballPos[1], ballPos[2]),
-						point(ballPos[0], ballPos[1] - br, ballPos[2]),
-					],
+				ball.render(ctx, world, camera);
 
-					[
-						point(ballPos[0], ballPos[1], ballPos[2] - br),
-						point(ballPos[0] + br, ballPos[1], ballPos[2]),
-						point(ballPos[0], ballPos[1] + br, ballPos[2]),
-					],
-					[
-						point(ballPos[0], ballPos[1], ballPos[2] - br),
-						point(ballPos[0] - br, ballPos[1], ballPos[2]),
-						point(ballPos[0], ballPos[1] + br, ballPos[2]),
-					],
-					[
-						point(ballPos[0], ballPos[1], ballPos[2] - br),
-						point(ballPos[0] + br, ballPos[1], ballPos[2]),
-						point(ballPos[0], ballPos[1] - br, ballPos[2]),
-					],
-					[
-						point(ballPos[0], ballPos[1], ballPos[2] - br),
-						point(ballPos[0] - br, ballPos[1], ballPos[2]),
-						point(ballPos[0], ballPos[1] - br, ballPos[2]),
-					],
-				]
-				.forEach(function(face) {
-					ctx.beginPath();
-					face.forEach(function(p, i) {
-						var pp = vec4.create();
-						vec3.transformMat4(pp, p, world);
-						vec3.transformMat4(pp, pp, camera);
-						if(i == 0) {
-							ctx.moveTo(pp[0], pp[1]);
-						} else {
-							ctx.lineTo(pp[0], pp[1]);
-						}
-					});
-					ctx.closePath();
-					ctx.fillStyle = '#f00';
-					ctx.fill();
-				});
-
-				ctx.beginPath();
-				for(var v = 0; v <= Math.PI * 2; v += Math.PI * 2 / 16) {
-					var b = point(Math.cos(v) * 0.1 + ballPos[0], Math.sin(v) * 0.1 + ballPos[1], ballPos[2]);
-					var bp = vec4.create();
-					vec3.transformMat4(bp, b, world);
-					vec3.transformMat4(bp, bp, camera);
-					// if(first) console.log(v)
-					if(v == 0) {
-						ctx.moveTo(bp[0], bp[1]);
-					} else {
-						ctx.lineTo(bp[0], bp[1]);
-					}
-				}
-				ctx.closePath();
-				ctx.fillStyle = '#f00';
-				ctx.fill();
-
-				ctx.beginPath();
-				for(var v = 0; v <= Math.PI * 2; v += Math.PI * 2 / 16) {
-					var b = point(ballPos[0], Math.sin(v) * 0.1 + ballPos[1], Math.cos(v) * 0.1 + ballPos[2]);
-					var bp = vec4.create();
-					vec3.transformMat4(bp, b, world);
-					vec3.transformMat4(bp, bp, camera);
-					// if(first) console.log(v)
-					if(v == 0) {
-						ctx.moveTo(bp[0], bp[1]);
-					} else {
-						ctx.lineTo(bp[0], bp[1]);
-					}
-				}
-				ctx.closePath();
-				ctx.fillStyle = '#f00';
-				ctx.fill();
-
-				ctx.beginPath();
-				[
-					point(-pw + paddlePos[0], -ph - paddlePos[1], paddlePos[2]),
-					point(pw + paddlePos[0], -ph - paddlePos[1], paddlePos[2]),
-					point(pw + paddlePos[0], ph - paddlePos[1], paddlePos[2]),
-					point(-pw + paddlePos[0], ph - paddlePos[1], paddlePos[2]),
-				]
-				.forEach(function(p, i) {
-					var pp = vec4.create();
-					vec3.transformMat4(pp, p, world);
-					vec3.transformMat4(pp, pp, camera);
-					if(i == 0) {
-						ctx.moveTo(pp[0], pp[1]);
-					} else {
-						ctx.lineTo(pp[0], pp[1]);
-					}
-				});
-
-				ctx.closePath();
-				ctx.fillStyle = 'rgba(200, 200, 200, 0.5)';
-				ctx.fill();
+				paddle.render(ctx, world, camera);
 
 				ctx.restore();
 
