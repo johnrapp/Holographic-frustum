@@ -429,7 +429,7 @@ angular.module('app', ['ngMaterial', 'lib'])
 
 					// this.acc = point(Math.pow(Math.E, 0.9 * dt));
 
-					vec3.scale(this.acc, this.acc, 0.999);
+					vec3.scale(this.acc, this.acc, 0.99);
 
 					if(this.pos[2] >= 3) {
 						this.pos = point(this.pos[0], this.pos[1], 3);
@@ -454,7 +454,7 @@ angular.module('app', ['ngMaterial', 'lib'])
 							this.vel = point(this.vel[0], this.vel[1], -this.vel[2]);
 							// this.vel = point(this.vel[0] + paddle.vel[0] * 6, this.vel[1] + -paddle.vel[1] * 6, -this.vel[2]);
 
-							this.acc = point(paddle.vel[0] * 12, -paddle.vel[1] * 12, 0);
+							this.acc = point(-paddle.vel[0] * 20, -(-paddle.vel[1] * 20), 0);
 
 							this.hitTime = time;
 						} else {
@@ -599,7 +599,8 @@ angular.module('app', ['ngMaterial', 'lib'])
 					this.lastPos = this.pos;
 					if(tap != null) {
 						fx = tap.x * 2;
-						fy = tap.y * 2;
+						fy = tap.y * 1;
+						// fy = tap.y * 2;
 					}
 
 					this.pos = point(fx - 1, fy - 0.5, 0);
@@ -789,7 +790,7 @@ angular.module('app', ['ngMaterial', 'lib'])
 					var pp = vec4.create();
 					vec3.transformMat4(pp, p, world);
 					vec3.transformMat4(pp, pp, camera);
-					// ctx.lineWidth = 5 * ((pp[2] - 1.5) / 1.5 + 0.5)/1.5;
+					ctx.lineWidth = 5 * ((pp[2] - 1.5) / 1.5 + 0.5)/1.5;
 					if(j == 0) {
 						ctx.moveTo(pp[0], pp[1]);
 					} else {

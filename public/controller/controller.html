@@ -12,18 +12,28 @@
 	<style type="text/css">
 		#touch-area {
 			background: gray;
-			width: 100%;
-			height: 300px;
-			width: 100vw;
-			height: 50vw;
-			-webkit-clip-path: polygon(0% 0%, 50% 100%, 100% 0%);
+			/*margin: auto;*/
+			position: absolute;
+			/*left: 50%;*/
+			/*transform: translateX(-50%);*/
+			width: 500px;
+			height: 250px;
+			/*width: 100vw;*/
+			/*height: 50vw;*/
+			/*-webkit-clip-path: polygon(0% 0%, 50% 100%, 100% 0%);*/
 		}
-		@media (min-aspect-ratio: 1/1) {
+		/*@media (min-aspect-ratio: 1/1) {
 			#touch-area {
-				width: 100vh;
-				height: 50vh;
+				width: 200vw;
+				height: calc(100vw - 48px);
 				margin: auto;
+				position: absolute;
+				left: 50%;
+				transform: translateX(-50%);
 			} 
+		}*/
+		md-radio-group {
+
 		}
 	</style>
 </head>
@@ -31,12 +41,42 @@
 
 <md-button id="refresh" ng-click="refresh()">Refresh</md-button>
 <md-button id="rotate" ng-click="rotate()">Rotate</md-button>
+<md-radio-group>Player
+	<md-radio-button>1</md-radio-button>
+	<md-radio-button>2</md-radio-button>
+</md-radio-group>
 
 <div id="touch-area" touch-area>
 	
 </div>
 
 <pre id="debug"></pre>
+
+<script type="text/javascript">
+	
+var touchArea = document.querySelector('#touch-area')
+function position() {
+	var w = window.innerWidth;
+	var h = window.innerHeight - 48;
+
+	var W = Math.min(w, 2*h);
+	var H = W / 2;
+
+	touchArea.style.width = W + 'px';
+	touchArea.style.height = H + 'px';
+
+	if(w > W) {
+		touchArea.style.left = (w - W) / 2 + 'px';
+	} else {
+		touchArea.style.left = '0';
+	}
+}
+
+position();
+
+window.addEventListener('resize', position);
+
+</script>
 
 <script src="/lib/angular.js"></script>
 <script src="/lib/angular-animate.js"></script>
